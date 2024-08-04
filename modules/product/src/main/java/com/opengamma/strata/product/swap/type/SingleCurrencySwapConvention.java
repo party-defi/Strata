@@ -26,7 +26,7 @@ import com.opengamma.strata.product.swap.SwapTrade;
 /**
  * A market convention for swap trades.
  * <p>
- * This defines the market convention for a a swap.
+ * This defines the market convention for a swap.
  * Each different type of swap has its own convention - this interface provides an abstraction.
  */
 public interface SingleCurrencySwapConvention
