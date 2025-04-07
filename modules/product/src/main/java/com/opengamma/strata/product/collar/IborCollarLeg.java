@@ -843,27 +843,11 @@ public final class IborCollarLeg
      * The cap rate is only allowed to change at payment period boundaries.
      * <p>
      * If the product is not a cap, the cap schedule will be absent.
-     * @param capSchedule  the new value
+     * @param collarSchedule  the new value
      * @return this, for chaining, not null
      */
-    public Builder capSchedule(ValueSchedule capSchedule) {
-      this.capSchedule = capSchedule;
-      return this;
-    }
-
-    /**
-     * Sets the floor schedule, optional.
-     * <p>
-     * This defines the strike value of a floor as an initial value and a list of adjustments.
-     * Thus individual floorlets may have different strike values.
-     * The floor rate is only allowed to change at payment period boundaries.
-     * <p>
-     * If the product is not a floor, the floor schedule will be absent.
-     * @param floorSchedule  the new value
-     * @return this, for chaining, not null
-     */
-    public Builder floorSchedule(ValueSchedule floorSchedule) {
-      this.floorSchedule = floorSchedule;
+    public Builder collarSchedule(ValueSchedule collarSchedule) {
+      this.capSchedule = collarSchedule;
       return this;
     }
 

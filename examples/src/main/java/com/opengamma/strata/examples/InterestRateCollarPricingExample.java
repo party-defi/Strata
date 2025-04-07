@@ -3,6 +3,13 @@ package com.opengamma.strata.examples;
 import com.google.common.collect.ImmutableList;
 import com.opengamma.strata.basics.ReferenceData;
 import com.opengamma.strata.basics.StandardId;
+import com.opengamma.strata.basics.currency.AdjustablePayment;
+import com.opengamma.strata.basics.currency.CurrencyAmount;
+import com.opengamma.strata.basics.date.*;
+import com.opengamma.strata.basics.schedule.Frequency;
+import com.opengamma.strata.basics.schedule.PeriodicSchedule;
+import com.opengamma.strata.basics.schedule.StubConvention;
+import com.opengamma.strata.basics.value.ValueSchedule;
 import com.opengamma.strata.calc.CalculationRules;
 import com.opengamma.strata.calc.CalculationRunner;
 import com.opengamma.strata.calc.Column;
@@ -18,7 +25,11 @@ import com.opengamma.strata.measure.StandardComponents;
 import com.opengamma.strata.product.AttributeType;
 import com.opengamma.strata.product.Trade;
 import com.opengamma.strata.product.TradeInfo;
+import com.opengamma.strata.product.collar.IborCollar;
+import com.opengamma.strata.product.collar.IborCollarLeg;
+import com.opengamma.strata.product.collar.IborCollarTrade;
 import com.opengamma.strata.product.common.BuySell;
+import com.opengamma.strata.product.swap.*;
 import com.opengamma.strata.product.swap.type.FixedIborSwapConventions;
 import com.opengamma.strata.report.ReportCalculationResults;
 import com.opengamma.strata.report.trade.TradeReport;
@@ -26,6 +37,17 @@ import com.opengamma.strata.report.trade.TradeReportTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static com.opengamma.strata.basics.currency.Currency.EUR;
+import static com.opengamma.strata.basics.currency.Currency.USD;
+import static com.opengamma.strata.basics.date.BusinessDayConventions.MODIFIED_FOLLOWING;
+import static com.opengamma.strata.basics.date.BusinessDayConventions.PRECEDING;
+import static com.opengamma.strata.basics.date.DayCounts.THIRTY_U_360;
+import static com.opengamma.strata.basics.date.HolidayCalendarIds.EUTA;
+import static com.opengamma.strata.basics.index.IborIndices.EUR_EURIBOR_3M;
+import static com.opengamma.strata.basics.schedule.Frequency.P6M;
+import static com.opengamma.strata.product.common.PayReceive.PAY;
+import static com.opengamma.strata.product.common.PayReceive.RECEIVE;
 
 public class InterestRateCollarPricingExample {
     public static void main (String[] args) {
@@ -41,17 +63,17 @@ public class InterestRateCollarPricingExample {
 
         // the columns, specifying the measures to be calculated
         List<Column> columns = ImmutableList.of(
-                Column.of(Measures.LEG_INITIAL_NOTIONAL),
-                Column.of(Measures.PRESENT_VALUE),
-                Column.of(Measures.LEG_PRESENT_VALUE),
-                Column.of(Measures.PV01_CALIBRATED_SUM),
-                Column.of(Measures.PAR_RATE),
-                Column.of(Measures.ACCRUED_INTEREST),
-                Column.of(Measures.PV01_CALIBRATED_BUCKETED),
-                Column.of(AdvancedMeasures.PV01_SEMI_PARALLEL_GAMMA_BUCKETED));
+//                Column.of(Measures.LEG_INITIAL_NOTIONAL)//,
+//                Column.of(Measures.PRESENT_VALUE),
+                Column.of(Measures.LEG_PRESENT_VALUE));//,
+//                Column.of(Measures.PV01_CALIBRATED_SUM),
+//                Column.of(Measures.PAR_RATE),
+//                Column.of(Measures.ACCRUED_INTEREST),
+//                Column.of(Measures.PV01_CALIBRATED_BUCKETED),
+//                Column.of(AdvancedMeasures.PV01_SEMI_PARALLEL_GAMMA_BUCKETED));
 
         // use the built-in example market data
-        LocalDate valuationDate = LocalDate.of(2014, 1, 22);
+        LocalDate valuationDate = LocalDate.of(2025, 1, 17);
         ExampleMarketDataBuilder marketDataBuilder = ExampleMarketData.builder();
         MarketData marketData = marketDataBuilder.buildSnapshot(valuationDate);
 
@@ -69,7 +91,7 @@ public class InterestRateCollarPricingExample {
         ReportCalculationResults calculationResults =
                 ReportCalculationResults.of(valuationDate, trades, columns, results, functions, refData);
 
-        TradeReportTemplate reportTemplate = ExampleData.loadTradeReportTemplate("swap-report-template");
+        TradeReportTemplate reportTemplate = ExampleData.loadTradeReportTemplate("collared-swap-report-template");
         TradeReport tradeReport = TradeReport.of(calculationResults, reportTemplate);
         tradeReport.writeAsciiTable(System.out);
     }
@@ -80,20 +102,80 @@ public class InterestRateCollarPricingExample {
        );
     }
 
-    private static Trade createBasicFixedVsLibor3mCollar () {
-        TradeInfo tradeInfo = TradeInfo.builder()
-                .id(StandardId.of("example", "1"))
-                .addAttribute(AttributeType.DESCRIPTION, "Fixed vs Libor 3m")
-                .counterparty(StandardId.of("example", "A"))
-                .settlementDate(LocalDate.of(2027, 9, 12))
+    private static final LocalDate START = LocalDate.of(2025, 9, 17);
+    private static final LocalDate END = LocalDate.of(2029, 9, 17);
+    private static final IborRateCalculation RATE_CALCULATION = IborRateCalculation.of(EUR_EURIBOR_3M);
+    private static final Frequency FREQUENCY = Frequency.P3M;
+    private static final BusinessDayAdjustment BUSS_ADJ =
+            BusinessDayAdjustment.of(BusinessDayConventions.FOLLOWING, EUTA);
+    private static final PeriodicSchedule SCHEDULE = PeriodicSchedule.builder()
+            .startDate(START)
+            .endDate(END)
+            .frequency(FREQUENCY)
+            .businessDayAdjustment(BUSS_ADJ)
+            .build();
+    private static final DaysAdjustment PAYMENT_OFFSET = DaysAdjustment.ofBusinessDays(2, EUTA);
+    // SWAP COPIED BITS
+    private static final NotionalSchedule UNIT_NOTIONAL = NotionalSchedule.of(USD, 1d);
+    private static final HolidayCalendarId CALENDAR = HolidayCalendarIds.SAT_SUN;
+    private static final BusinessDayAdjustment BDA_MF = BusinessDayAdjustment.of(MODIFIED_FOLLOWING, CALENDAR);
+
+    private static final double RATE = 0.0175;
+
+    private static final SwapLeg FIXED_LEG =
+            RateCalculationSwapLeg
+                .builder()
+                .payReceive(RECEIVE)
+                .accrualSchedule(PeriodicSchedule.builder()
+                    .startDate(START)
+                    .endDate(END)
+                    .frequency(P6M)
+                    .businessDayAdjustment(BDA_MF)
+                    .stubConvention(StubConvention.SHORT_FINAL)
+                    .build())
+                .paymentSchedule(PaymentSchedule.builder()
+                    .paymentFrequency(P6M)
+                    .paymentDateOffset(DaysAdjustment.NONE)
+                    .build())
+                .notionalSchedule(UNIT_NOTIONAL)
+                .calculation(FixedRateCalculation.builder()
+                    .dayCount(THIRTY_U_360)
+                    .rate(ValueSchedule.of(RATE))
+                    .build())
                 .build();
-        return FixedIborSwapConventions.USD_FIXED_6M_LIBOR_3M.toTrade(
-                tradeInfo,
-                LocalDate.of(2025, 9, 12), // the start date
-                LocalDate.of(2028, 9, 12), // the end date
-                BuySell.BUY,               // indicates wheter this trade is a buy or sell
-                100_000_000,               // the notional amount
-                0.015);                    // the fixed interest rate
+    // END SWAP BITS
+    private static final ValueSchedule COLLAR = ValueSchedule.of(0.0325);
+    private static final double NOTIONAL_VALUE = 1.0e6;
+    private static final ValueSchedule NOTIONAL = ValueSchedule.of(NOTIONAL_VALUE);
+    private static final IborCollarLeg COLLAR_LEG =
+            IborCollarLeg.builder()
+                .calculation(RATE_CALCULATION)
+                .collarSchedule(COLLAR)
+                .notional(NOTIONAL)
+                .paymentDateOffset(PAYMENT_OFFSET)
+                .paymentSchedule(SCHEDULE)
+                .payReceive(PAY)
+                .build();
+
+    private static final IborCollar PRODUCT = IborCollar.of(COLLAR_LEG, FIXED_LEG);
+    private static final AdjustablePayment PREMIUM =
+            AdjustablePayment.of(CurrencyAmount.of(EUR, NOTIONAL_VALUE), LocalDate.of(2025, 9, 17));
+
+    private static Trade createBasicFixedVsLibor3mCollar () {
+        TradeInfo tradeInfo =
+                TradeInfo.builder()
+                        .id(StandardId.of("example", "1"))
+                        .addAttribute(AttributeType.DESCRIPTION, "Fixed vs Libor 3m")
+                        .counterparty(StandardId.of("example", "A"))
+                        .settlementDate(LocalDate.of(2029, 9, 17))
+                        .build();
+
+        return IborCollarTrade
+                    .builder()
+                    .info(tradeInfo)
+                    .product(PRODUCT)
+                    .premium(PREMIUM)
+                    .build();
     }
 
 

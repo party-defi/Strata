@@ -34,13 +34,13 @@ import com.opengamma.strata.product.Product;
 import com.opengamma.strata.product.swap.SwapLeg;
 
 /**
- * An Ibor cap/floor product.
+ * An Ibor collar product.
  * <p>
- * The Ibor cap/floor product consists of two legs, a cap/floor leg and a pay leg.
- * The cap/floor leg involves a set of call/put options on successive Ibor index rates,
+ * The Ibor collar product consists of two legs, a collar leg and a pay leg.
+ * The collar leg involves a set of call/put options on successive Ibor index rates,
  * known as Ibor caplets/floorlets.
  * The pay leg is any swap leg from a standard interest rate swap. The pay leg is absent for typical
- * Ibor cap/floor products, with the premium paid upfront instead, as defined in {@link IborCollarTrade}.
+ * Ibor collar products, with the premium paid upfront instead, as defined in {@link IborCollarTrade}.
  */
 @BeanDefinition(builderScope = "private")
 public final class IborCollar
@@ -58,7 +58,7 @@ public final class IborCollar
   /**
    * The optional pay leg of the product.
    * <p>
-   * These periodic payments are not made for typical cap/floor products.
+   * These periodic payments are not made for typical collar products.
    * Instead, the premium is paid upfront.
    */
   @PropertyDefinition(get = "optional")
@@ -66,23 +66,23 @@ public final class IborCollar
 
   //-------------------------------------------------------------------------
   /**
-   * Obtains an instance from a cap/floor leg with no pay leg.
+   * Obtains an instance from a collar leg with no pay leg.
    * <p>
-   * The pay leg is absent in the resulting cap/floor.
+   * The pay leg is absent in the resulting collar.
    * 
-   * @param collarLeg  the cap/floor leg
-   * @return the cap/floor
+   * @param collarLeg  the collar leg
+   * @return the collar
    */
   public static IborCollar of(IborCollarLeg collarLeg) {
     return new IborCollar(collarLeg,  null);
   }
 
   /**
-   * Obtains an instance from a cap/floor leg and a pay leg.
+   * Obtains an instance from a collar leg and a pay leg.
    * 
-   * @param collarLeg  the cap/floor leg
+   * @param collarLeg  the collar leg
    * @param payLeg  the pay leg
-   * @return the cap/floor
+   * @return the collar
    */
   public static IborCollar of(IborCollarLeg collarLeg, SwapLeg payLeg) {
     return new IborCollar(collarLeg, payLeg);
@@ -121,12 +121,12 @@ public final class IborCollar
   }
 
   /**
-   * Returns the set of indices referred to by the cap/floor.
+   * Returns the set of indices referred to by the collar.
    * <p>
-   * A cap/floor will typically refer to one index, such as 'GBP-LIBOR-3M'.
+   * A collar will typically refer to one index, such as 'GBP-LIBOR-3M'.
    * Calling this method will return the complete list of indices.
    * 
-   * @return the set of indices referred to by this cap/floor
+   * @return the set of indices referred to by this collar
    */
   public ImmutableSet<Index> allIndices() {
     ImmutableSet.Builder<Index> builder = ImmutableSet.builder();
@@ -195,7 +195,7 @@ public final class IborCollar
   /**
    * Gets the optional pay leg of the product.
    * <p>
-   * These periodic payments are not made for typical cap/floor products.
+   * These periodic payments are not made for typical collar products.
    * Instead, the premium is paid upfront.
    * @return the optional value of the property, not null
    */
