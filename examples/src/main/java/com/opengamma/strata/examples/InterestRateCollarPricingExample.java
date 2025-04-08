@@ -28,9 +28,7 @@ import com.opengamma.strata.product.TradeInfo;
 import com.opengamma.strata.product.collar.IborCollar;
 import com.opengamma.strata.product.collar.IborCollarLeg;
 import com.opengamma.strata.product.collar.IborCollarTrade;
-import com.opengamma.strata.product.common.BuySell;
 import com.opengamma.strata.product.swap.*;
-import com.opengamma.strata.product.swap.type.FixedIborSwapConventions;
 import com.opengamma.strata.report.ReportCalculationResults;
 import com.opengamma.strata.report.trade.TradeReport;
 import com.opengamma.strata.report.trade.TradeReportTemplate;
@@ -38,10 +36,8 @@ import com.opengamma.strata.report.trade.TradeReportTemplate;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.opengamma.strata.basics.currency.Currency.EUR;
-import static com.opengamma.strata.basics.currency.Currency.USD;
+import static com.opengamma.strata.basics.currency.Currency.*;
 import static com.opengamma.strata.basics.date.BusinessDayConventions.MODIFIED_FOLLOWING;
-import static com.opengamma.strata.basics.date.BusinessDayConventions.PRECEDING;
 import static com.opengamma.strata.basics.date.DayCounts.THIRTY_U_360;
 import static com.opengamma.strata.basics.date.HolidayCalendarIds.EUTA;
 import static com.opengamma.strata.basics.index.IborIndices.EUR_EURIBOR_3M;
@@ -59,12 +55,12 @@ public class InterestRateCollarPricingExample {
     }
 
     private static void calculate (CalculationRunner runner) {
-        List<Trade> trades = createCapletFloorletTrades ();
+        List<Trade> trades = createsCollarletTrades ();
 
         // the columns, specifying the measures to be calculated
         List<Column> columns = ImmutableList.of(
 //                Column.of(Measures.LEG_INITIAL_NOTIONAL)//,
-//                Column.of(Measures.PRESENT_VALUE),
+                Column.of(Measures.PRESENT_VALUE),
                 Column.of(Measures.LEG_PRESENT_VALUE));//,
 //                Column.of(Measures.PV01_CALIBRATED_SUM),
 //                Column.of(Measures.PAR_RATE),
@@ -96,7 +92,7 @@ public class InterestRateCollarPricingExample {
         tradeReport.writeAsciiTable(System.out);
     }
 
-    private static List<Trade> createCapletFloorletTrades () {
+    private static List<Trade> createsCollarletTrades () {
        return ImmutableList.of (
         createBasicFixedVsLibor3mCollar()
        );
@@ -116,7 +112,7 @@ public class InterestRateCollarPricingExample {
             .build();
     private static final DaysAdjustment PAYMENT_OFFSET = DaysAdjustment.ofBusinessDays(2, EUTA);
     // SWAP COPIED BITS
-    private static final NotionalSchedule UNIT_NOTIONAL = NotionalSchedule.of(USD, 1d);
+    private static final NotionalSchedule UNIT_NOTIONAL = NotionalSchedule.of(GBP, 1d);
     private static final HolidayCalendarId CALENDAR = HolidayCalendarIds.SAT_SUN;
     private static final BusinessDayAdjustment BDA_MF = BusinessDayAdjustment.of(MODIFIED_FOLLOWING, CALENDAR);
 
@@ -159,13 +155,13 @@ public class InterestRateCollarPricingExample {
 
     private static final IborCollar PRODUCT = IborCollar.of(COLLAR_LEG, FIXED_LEG);
     private static final AdjustablePayment PREMIUM =
-            AdjustablePayment.of(CurrencyAmount.of(EUR, NOTIONAL_VALUE), LocalDate.of(2025, 9, 17));
+            AdjustablePayment.of(CurrencyAmount.of(GBP, NOTIONAL_VALUE), LocalDate.of(2025, 9, 17));
 
     private static Trade createBasicFixedVsLibor3mCollar () {
         TradeInfo tradeInfo =
                 TradeInfo.builder()
                         .id(StandardId.of("example", "1"))
-                        .addAttribute(AttributeType.DESCRIPTION, "Fixed vs Libor 3m")
+                        .addAttribute(AttributeType.DESCRIPTION, "Fixed vs Libor 3m collar")
                         .counterparty(StandardId.of("example", "A"))
                         .settlementDate(LocalDate.of(2029, 9, 17))
                         .build();
