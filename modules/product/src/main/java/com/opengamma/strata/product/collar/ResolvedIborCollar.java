@@ -195,7 +195,7 @@ public final class ResolvedIborCollar
    * The payments are Ibor caplets.
    * @return the value of the property, not null
    */
-  public ResolvedIborCollarLeg getCapLeg() {
+  public ResolvedIborCollarLeg getCollarLeg() {
     return collarLeg;
   }
 
@@ -253,10 +253,10 @@ public final class ResolvedIborCollar
     static final Meta INSTANCE = new Meta();
 
     /**
-     * The meta-property for the {@code capFloorLeg} property.
+     * The meta-property for the {@code collarLeg} property.
      */
-    private final MetaProperty<ResolvedIborCollarLeg> capFloorLeg = DirectMetaProperty.ofImmutable(
-        this, "capFloorLeg", ResolvedIborCollar.class, ResolvedIborCollarLeg.class);
+    private final MetaProperty<ResolvedIborCollarLeg> collarLeg = DirectMetaProperty.ofImmutable(
+        this, "collarLeg", ResolvedIborCollar.class, ResolvedIborCollarLeg.class);
     /**
      * The meta-property for the {@code payLeg} property.
      */
@@ -267,7 +267,7 @@ public final class ResolvedIborCollar
      */
     private final Map<String, MetaProperty<?>> metaPropertyMap$ = new DirectMetaPropertyMap(
         this, null,
-        "capFloorLeg",
+        "collarLeg",
         "payLeg");
 
     /**
@@ -279,8 +279,8 @@ public final class ResolvedIborCollar
     @Override
     protected MetaProperty<?> metaPropertyGet(String propertyName) {
       switch (propertyName.hashCode()) {
-        case 2124672084:  // capFloorLeg
-          return capFloorLeg;
+        case 2124672084:  // collarLeg
+          return collarLeg;
         case -995239866:  // payLeg
           return payLeg;
       }
@@ -304,11 +304,11 @@ public final class ResolvedIborCollar
 
     //-----------------------------------------------------------------------
     /**
-     * The meta-property for the {@code capFloorLeg} property.
+     * The meta-property for the {@code collarLeg} property.
      * @return the meta-property, not null
      */
-    public MetaProperty<ResolvedIborCollarLeg> capFloorLeg() {
-      return capFloorLeg;
+    public MetaProperty<ResolvedIborCollarLeg> collarLeg() {
+      return collarLeg;
     }
 
     /**
@@ -323,8 +323,8 @@ public final class ResolvedIborCollar
     @Override
     protected Object propertyGet(Bean bean, String propertyName, boolean quiet) {
       switch (propertyName.hashCode()) {
-        case 2124672084:  // capFloorLeg
-          return ((ResolvedIborCollar) bean).getCapLeg();
+        case 2124672084:  // collarLeg
+          return ((ResolvedIborCollar) bean).getCollarLeg();
         case -995239866:  // payLeg
           return ((ResolvedIborCollar) bean).payLeg;
       }
@@ -362,7 +362,7 @@ public final class ResolvedIborCollar
     @Override
     public Object get(String propertyName) {
       switch (propertyName.hashCode()) {
-        case 2124672084:  // capFloorLeg
+        case 2124672084:  // collarLeg
           return collarLeg;
         case -995239866:  // payLeg
           return payLeg;
@@ -374,7 +374,7 @@ public final class ResolvedIborCollar
     @Override
     public Builder set(String propertyName, Object newValue) {
       switch (propertyName.hashCode()) {
-        case 2124672084:  // capFloorLeg
+        case 2124672084:  // collarLeg
           this.collarLeg = (ResolvedIborCollarLeg) newValue;
           break;
         case -995239866:  // payLeg

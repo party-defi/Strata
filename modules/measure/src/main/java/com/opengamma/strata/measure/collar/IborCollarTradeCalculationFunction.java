@@ -25,15 +25,15 @@ import com.opengamma.strata.data.scenario.ScenarioMarketData;
 import com.opengamma.strata.measure.Measures;
 import com.opengamma.strata.measure.rate.RatesMarketDataLookup;
 import com.opengamma.strata.measure.rate.RatesScenarioMarketData;
-import com.opengamma.strata.product.capfloor.IborCapFloor;
-import com.opengamma.strata.product.capfloor.IborCapFloorTrade;
-import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
+import com.opengamma.strata.product.collar.IborCollar;
+import com.opengamma.strata.product.collar.IborCollarTrade;
+import com.opengamma.strata.product.collar.ResolvedIborCollarTrade;
 
 /**
- * Perform calculations on a single {@code IborCapFloorTrade} for each of a set of scenarios.
+ * Perform calculations on a single {@code IborCollarTrade} for each of a set of scenarios.
  * <p>
  * This uses Black, Normal or SABR cap/floor volatilities,
- * which must be specified using {@link IborCapFloorMarketDataLookup}.
+ * which must be specified using {@link IborCollarMarketDataLookup}.
  * An instance of {@link RatesMarketDataLookup} must also be specified.
  * <p>
  * The supported built-in measures are:
@@ -51,21 +51,21 @@ import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
  * <p>
  * The "natural" currency is determined from the cap/floor leg.
  */
-public class IborCapFloorTradeCalculationFunction
-    implements CalculationFunction<IborCapFloorTrade> {
+public class IborCollarTradeCalculationFunction
+    implements CalculationFunction<IborCollarTrade> {
 
   /**
    * The calculations by measure.
    */
   private static final ImmutableMap<Measure, SingleMeasureCalculation> CALCULATORS =
       ImmutableMap.<Measure, SingleMeasureCalculation>builder()
-          .put(Measures.PRESENT_VALUE, IborCapFloorMeasureCalculations.DEFAULT::presentValue)
-          .put(Measures.PV01_CALIBRATED_SUM, IborCapFloorMeasureCalculations.DEFAULT::pv01RatesCalibratedSum)
-          .put(Measures.PV01_CALIBRATED_BUCKETED, IborCapFloorMeasureCalculations.DEFAULT::pv01RatesCalibratedBucketed)
-          .put(Measures.PV01_MARKET_QUOTE_SUM, IborCapFloorMeasureCalculations.DEFAULT::pv01RatesMarketQuoteSum)
-          .put(Measures.PV01_MARKET_QUOTE_BUCKETED, IborCapFloorMeasureCalculations.DEFAULT::pv01RatesMarketQuoteBucketed)
-          .put(Measures.CURRENCY_EXPOSURE, IborCapFloorMeasureCalculations.DEFAULT::currencyExposure)
-          .put(Measures.CURRENT_CASH, IborCapFloorMeasureCalculations.DEFAULT::currentCash)
+          .put(Measures.PRESENT_VALUE, IborCollarMeasureCalculations.DEFAULT::presentValue)
+          .put(Measures.PV01_CALIBRATED_SUM, IborCollarMeasureCalculations.DEFAULT::pv01RatesCalibratedSum)
+          .put(Measures.PV01_CALIBRATED_BUCKETED, IborCollarMeasureCalculations.DEFAULT::pv01RatesCalibratedBucketed)
+          .put(Measures.PV01_MARKET_QUOTE_SUM, IborCollarMeasureCalculations.DEFAULT::pv01RatesMarketQuoteSum)
+          .put(Measures.PV01_MARKET_QUOTE_BUCKETED, IborCollarMeasureCalculations.DEFAULT::pv01RatesMarketQuoteBucketed)
+          .put(Measures.CURRENCY_EXPOSURE, IborCollarMeasureCalculations.DEFAULT::currencyExposure)
+          .put(Measures.CURRENT_CASH, IborCollarMeasureCalculations.DEFAULT::currentCash)
           .put(Measures.RESOLVED_TARGET, (rt, smd, m) -> rt)
           .build();
 
@@ -74,13 +74,13 @@ public class IborCapFloorTradeCalculationFunction
   /**
    * Creates an instance.
    */
-  public IborCapFloorTradeCalculationFunction() {
+  public IborCollarTradeCalculationFunction() {
   }
 
   //-------------------------------------------------------------------------
   @Override
-  public Class<IborCapFloorTrade> targetType() {
-    return IborCapFloorTrade.class;
+  public Class<IborCollarTrade> targetType() {
+    return IborCollarTrade.class;
   }
 
   @Override
@@ -89,51 +89,51 @@ public class IborCapFloorTradeCalculationFunction
   }
 
   @Override
-  public Optional<String> identifier(IborCapFloorTrade target) {
+  public Optional<String> identifier(IborCollarTrade target) {
     return target.getInfo().getId().map(id -> id.toString());
   }
 
   @Override
-  public Currency naturalCurrency(IborCapFloorTrade trade, ReferenceData refData) {
-    return trade.getProduct().getCapFloorLeg().getCurrency();
+  public Currency naturalCurrency(IborCollarTrade trade, ReferenceData refData) {
+    return trade.getProduct().getCollarLeg().getCurrency();
   }
 
   //-------------------------------------------------------------------------
   @Override
   public FunctionRequirements requirements(
-      IborCapFloorTrade trade,
+      IborCollarTrade trade,
       Set<Measure> measures,
       CalculationParameters parameters,
       ReferenceData refData) {
 
     // extract data from product
-    IborCapFloor product = trade.getProduct();
+    IborCollar product = trade.getProduct();
     Set<Currency> currencies = product.allPaymentCurrencies();
     Set<Index> indices = product.allIndices();
 
     // use lookup to build requirements
     RatesMarketDataLookup ratesLookup = parameters.getParameter(RatesMarketDataLookup.class);
     FunctionRequirements ratesReqs = ratesLookup.requirements(currencies, indices);
-    IborCapFloorMarketDataLookup capFloorLookup = parameters.getParameter(IborCapFloorMarketDataLookup.class);
-    FunctionRequirements capFloorReqs = capFloorLookup.requirements(product.getCapFloorLeg().getIndex());
+    IborCollarMarketDataLookup capFloorLookup = parameters.getParameter(IborCollarMarketDataLookup.class);
+    FunctionRequirements capFloorReqs = capFloorLookup.requirements(product.getCollarLeg().getIndex());
     return ratesReqs.combinedWith(capFloorReqs);
   }
 
   //-------------------------------------------------------------------------
   @Override
   public Map<Measure, Result<?>> calculate(
-      IborCapFloorTrade trade,
+      IborCollarTrade trade,
       Set<Measure> measures,
       CalculationParameters parameters,
       ScenarioMarketData scenarioMarketData,
       ReferenceData refData) {
 
     // expand the trade once for all measures and all scenarios
-    ResolvedIborCapFloorTrade resolved = trade.resolve(refData);
+    ResolvedIborCollarTrade resolved = trade.resolve(refData);
     RatesMarketDataLookup ratesLookup = parameters.getParameter(RatesMarketDataLookup.class);
     RatesScenarioMarketData ratesMarketData = ratesLookup.marketDataView(scenarioMarketData);
-    IborCapFloorMarketDataLookup capFloorLookup = parameters.getParameter(IborCapFloorMarketDataLookup.class);
-    IborCapFloorScenarioMarketData capFloorMarketData = capFloorLookup.marketDataView(scenarioMarketData);
+    IborCollarMarketDataLookup capFloorLookup = parameters.getParameter(IborCollarMarketDataLookup.class);
+    IborCollarScenarioMarketData capFloorMarketData = capFloorLookup.marketDataView(scenarioMarketData);
 
     // loop around measures, calculating all scenarios for one measure
     Map<Measure, Result<?>> results = new HashMap<>();
@@ -146,13 +146,13 @@ public class IborCapFloorTradeCalculationFunction
   // calculate one measure
   private Result<?> calculate(
       Measure measure,
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesScenarioMarketData ratesMarketData,
-      IborCapFloorScenarioMarketData capFloorMarketData) {
+      IborCollarScenarioMarketData capFloorMarketData) {
 
     SingleMeasureCalculation calculator = CALCULATORS.get(measure);
     if (calculator == null) {
-      return Result.failure(FailureReason.UNSUPPORTED, "Unsupported measure for IborCapFloorTrade: {}", measure);
+      return Result.failure(FailureReason.UNSUPPORTED, "Unsupported measure for IborCollarTrade: {}", measure);
     }
     return Result.of(() -> calculator.calculate(trade, ratesMarketData, capFloorMarketData));
   }
@@ -161,9 +161,9 @@ public class IborCapFloorTradeCalculationFunction
   @FunctionalInterface
   interface SingleMeasureCalculation {
     public abstract Object calculate(
-        ResolvedIborCapFloorTrade trade,
+        ResolvedIborCollarTrade trade,
         RatesScenarioMarketData ratesMarketData,
-        IborCapFloorScenarioMarketData capFloorMarketData);
+        IborCollarScenarioMarketData capFloorMarketData);
   }
 
 }

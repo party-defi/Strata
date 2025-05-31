@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import com.opengamma.strata.basics.index.IborIndex;
 import com.opengamma.strata.data.MarketData;
 import com.opengamma.strata.data.MarketDataNotFoundException;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilities;
 
 /**
  * Market data for Ibor cap/floor.
@@ -19,7 +19,7 @@ import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
  * <p>
  * Implementations of this interface must be immutable.
  */
-public interface IborCapFloorMarketData {
+public interface IborCollarMarketData {
 
   /**
    * Gets the valuation date.
@@ -36,7 +36,7 @@ public interface IborCapFloorMarketData {
    * 
    * @return the cap/floor lookup
    */
-  public abstract IborCapFloorMarketDataLookup getLookup();
+  public abstract IborCollarMarketDataLookup getLookup();
 
   /**
    * Gets the market data.
@@ -51,7 +51,7 @@ public interface IborCapFloorMarketData {
    * @param marketData  the market data to use
    * @return a market view based on the specified data
    */
-  public abstract IborCapFloorMarketData withMarketData(MarketData marketData);
+  public abstract IborCollarMarketData withMarketData(MarketData marketData);
 
   //-------------------------------------------------------------------------
   /**
@@ -63,6 +63,6 @@ public interface IborCapFloorMarketData {
    * @return the volatilities for the index
    * @throws MarketDataNotFoundException if the index is not found
    */
-  public abstract IborCapletFloorletVolatilities volatilities(IborIndex index);
+  public abstract IborCollarletVolatilities volatilities(IborIndex index);
 
 }

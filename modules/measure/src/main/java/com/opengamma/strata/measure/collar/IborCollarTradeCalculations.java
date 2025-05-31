@@ -11,45 +11,45 @@ import com.opengamma.strata.data.scenario.ScenarioArray;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
 import com.opengamma.strata.market.param.CurrencyParameterSensitivities;
 import com.opengamma.strata.measure.rate.RatesMarketDataLookup;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
-import com.opengamma.strata.pricer.capfloor.VolatilityIborCapFloorTradePricer;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilities;
+import com.opengamma.strata.pricer.collar.VolatilityIborCollarTradePricer;
 import com.opengamma.strata.pricer.rate.RatesProvider;
-import com.opengamma.strata.product.capfloor.IborCapFloorTrade;
-import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
+import com.opengamma.strata.product.collar.IborCollarTrade;
+import com.opengamma.strata.product.collar.ResolvedIborCollarTrade;
 
 /**
  * Calculates pricing and risk measures for cap/floor trades.
  * <p>
  * This provides a high-level entry point for cap/floor pricing and risk measures.
  * <p>
- * Each method takes a {@link ResolvedIborCapFloorTrade}, whereas application code will
- * typically work with {@link IborCapFloorTrade}. Call
- * {@link IborCapFloorTrade#resolve(com.opengamma.strata.basics.ReferenceData) CapFloorTrade::resolve(ReferenceData)}
- * to convert {@code CapFloorTrade} to {@code ResolvedIborCapFloorTrade}.
+ * Each method takes a {@link ResolvedIborCollarTrade}, whereas application code will
+ * typically work with {@link IborCollarTrade}. Call
+ * {@link IborCollarTrade#resolve(com.opengamma.strata.basics.ReferenceData) CollarTrade::resolve(ReferenceData)}
+ * to convert {@code CollarTrade} to {@code ResolvedIborCollarTrade}.
  */
-public class IborCapFloorTradeCalculations {
+public class IborCollarTradeCalculations {
 
   /**
    * Default implementation.
    */
-  public static final IborCapFloorTradeCalculations DEFAULT = new IborCapFloorTradeCalculations(
-      VolatilityIborCapFloorTradePricer.DEFAULT);
+  public static final IborCollarTradeCalculations DEFAULT = new IborCollarTradeCalculations(
+      VolatilityIborCollarTradePricer.DEFAULT);
 
   /**
-   * Pricer for {@link ResolvedIborCapFloorTrade}.
+   * Pricer for {@link ResolvedIborCollarTrade}.
    */
-  private final IborCapFloorMeasureCalculations calc;
+  private final IborCollarMeasureCalculations calc;
 
   /**
    * Creates an instance.
    * <p>
    * In most cases, applications should use the {@link #DEFAULT} instance.
    * 
-   * @param tradePricer  the pricer for {@link ResolvedIborCapFloorTrade}
+   * @param tradePricer  the pricer for {@link ResolvedIborCollarTrade}
    */
-  public IborCapFloorTradeCalculations(
-      VolatilityIborCapFloorTradePricer tradePricer) {
-    this.calc = new IborCapFloorMeasureCalculations(tradePricer);
+  public IborCollarTradeCalculations(
+      VolatilityIborCollarTradePricer tradePricer) {
+    this.calc = new IborCollarMeasureCalculations(tradePricer);
   }
 
   //-------------------------------------------------------------------------
@@ -63,9 +63,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value, one entry per scenario
    */
   public MultiCurrencyScenarioArray presentValue(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.presentValue(
@@ -83,9 +83,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value
    */
   public MultiCurrencyAmount presentValue(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.presentValue(trade, ratesProvider, volatilities);
   }
@@ -104,9 +104,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity, one entry per scenario
    */
   public MultiCurrencyScenarioArray pv01RatesCalibratedSum(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.pv01RatesCalibratedSum(
@@ -127,9 +127,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity
    */
   public MultiCurrencyAmount pv01RatesCalibratedSum(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.pv01RatesCalibratedSum(trade, ratesProvider, volatilities);
   }
@@ -148,9 +148,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity, one entry per scenario
    */
   public ScenarioArray<CurrencyParameterSensitivities> pv01RatesCalibratedBucketed(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.pv01RatesCalibratedBucketed(
@@ -171,9 +171,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity
    */
   public CurrencyParameterSensitivities pv01RatesCalibratedBucketed(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.pv01RatesCalibratedBucketed(trade, ratesProvider, volatilities);
   }
@@ -193,9 +193,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity, one entry per scenario
    */
   public MultiCurrencyScenarioArray pv01RatesMarketQuoteSum(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.pv01RatesMarketQuoteSum(
@@ -217,9 +217,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity
    */
   public MultiCurrencyAmount pv01RatesMarketQuoteSum(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.pv01RatesMarketQuoteSum(trade, ratesProvider, volatilities);
   }
@@ -239,9 +239,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity, one entry per scenario
    */
   public ScenarioArray<CurrencyParameterSensitivities> pv01RatesMarketQuoteBucketed(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.pv01RatesMarketQuoteBucketed(
@@ -263,9 +263,9 @@ public class IborCapFloorTradeCalculations {
    * @return the present value sensitivity
    */
   public CurrencyParameterSensitivities pv01RatesMarketQuoteBucketed(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.pv01RatesMarketQuoteBucketed(trade, ratesProvider, volatilities);
   }
@@ -283,9 +283,9 @@ public class IborCapFloorTradeCalculations {
    * @return the currency exposure, one entry per scenario
    */
   public MultiCurrencyScenarioArray currencyExposure(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.currencyExposure(
@@ -305,9 +305,9 @@ public class IborCapFloorTradeCalculations {
    * @return the currency exposure
    */
   public MultiCurrencyAmount currencyExposure(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.currencyExposure(trade, ratesProvider, volatilities);
   }
@@ -325,9 +325,9 @@ public class IborCapFloorTradeCalculations {
    * @return the current cash, one entry per scenario
    */
   public MultiCurrencyScenarioArray currentCash(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesMarketDataLookup ratesLookup,
-      IborCapFloorMarketDataLookup capFloorLookup,
+      IborCollarMarketDataLookup capFloorLookup,
       ScenarioMarketData marketData) {
 
     return calc.currentCash(
@@ -347,9 +347,9 @@ public class IborCapFloorTradeCalculations {
    * @return the current cash
    */
   public MultiCurrencyAmount currentCash(
-      ResolvedIborCapFloorTrade trade,
+      ResolvedIborCollarTrade trade,
       RatesProvider ratesProvider,
-      IborCapletFloorletVolatilities volatilities) {
+      IborCollarletVolatilities volatilities) {
 
     return calc.currentCash(trade, ratesProvider, volatilities);
   }

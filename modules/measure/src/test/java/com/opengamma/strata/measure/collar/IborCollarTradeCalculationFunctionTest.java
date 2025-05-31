@@ -17,8 +17,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
-import com.opengamma.strata.measure.collar.IborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorTradeCalculationFunction;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -43,23 +41,23 @@ import com.opengamma.strata.market.observable.IndexQuoteId;
 import com.opengamma.strata.measure.Measures;
 import com.opengamma.strata.measure.curve.TestMarketDataMap;
 import com.opengamma.strata.measure.rate.RatesMarketDataLookup;
-import com.opengamma.strata.pricer.capfloor.IborCapFloorDataSet;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletDataSet;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
-import com.opengamma.strata.pricer.capfloor.NormalIborCapFloorTradePricer;
-import com.opengamma.strata.pricer.capfloor.NormalIborCapletFloorletExpiryStrikeVolatilities;
+import com.opengamma.strata.pricer.collar.IborCollarDataSet;
+import com.opengamma.strata.pricer.collar.IborCollarletDataSet;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilitiesId;
+import com.opengamma.strata.pricer.collar.NormalIborCollarTradePricer;
+import com.opengamma.strata.pricer.collar.NormalIborCollarletExpiryStrikeVolatilities;
 import com.opengamma.strata.pricer.rate.RatesProvider;
 import com.opengamma.strata.product.TradeInfo;
-import com.opengamma.strata.product.capfloor.IborCapFloor;
-import com.opengamma.strata.product.capfloor.IborCapFloorLeg;
-import com.opengamma.strata.product.capfloor.IborCapFloorTrade;
-import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
+import com.opengamma.strata.product.collar.IborCollar;
+import com.opengamma.strata.product.collar.IborCollarLeg;
+import com.opengamma.strata.product.collar.IborCollarTrade;
+import com.opengamma.strata.product.collar.ResolvedIborCollarTrade;
 import com.opengamma.strata.product.swap.SwapLeg;
 
 /**
- * Test {@link IborCapFloorTradeCalculationFunction}.
+ * Test {@link IborCollarTradeCalculationFunction}.
  */
-public class IborCapFloorTradeCalculationFunctionTest {
+public class IborCollarTradeCalculationFunctionTest {
 
   private static final ReferenceData REF_DATA = ReferenceData.standard();
   private static final double NOTIONAL_VALUE = 1.0e6;
@@ -68,38 +66,38 @@ public class IborCapFloorTradeCalculationFunctionTest {
   private static final LocalDate END = LocalDate.of(2020, 10, 21);
   private static final double STRIKE_VALUE = 0.0105;
   private static final ValueSchedule STRIKE = ValueSchedule.of(STRIKE_VALUE);
-  private static final IborCapFloorLeg CAP_LEG =
-      IborCapFloorDataSet.createCapFloorLegUnresolved(EUR_EURIBOR_6M, START, END, STRIKE, NOTIONAL, CALL, RECEIVE);
+  private static final IborCollarLeg CAP_LEG =
+      IborCollarDataSet.createCollarLegUnresolved(EUR_EURIBOR_6M, START, END, STRIKE, NOTIONAL, RECEIVE);
   private static final SwapLeg PAY_LEG =
-      IborCapFloorDataSet.createFixedPayLegUnresolved(EUR_EURIBOR_6M, START, END, 0.0395, NOTIONAL_VALUE, PAY);
-  private static final IborCapFloor CAP_TWO_LEGS = IborCapFloor.of(CAP_LEG, PAY_LEG);
+      IborCollarDataSet.createFixedPayLegUnresolved(EUR_EURIBOR_6M, START, END, 0.0395, NOTIONAL_VALUE, PAY);
+  private static final IborCollar CAP_TWO_LEGS = IborCollar.of(CAP_LEG, PAY_LEG);
   private static final ZonedDateTime VALUATION = dateUtc(2015, 8, 20);
-  static final NormalIborCapletFloorletExpiryStrikeVolatilities VOLS = IborCapletFloorletDataSet
+  static final NormalIborCollarletExpiryStrikeVolatilities VOLS = IborCollarletDataSet
       .createNormalVolatilities(VALUATION, EUR_EURIBOR_6M);
   private static final TradeInfo TRADE_INFO = TradeInfo.builder().tradeDate(VALUATION.toLocalDate()).build();
-  private static final IborCapFloorTrade TRADE = IborCapFloorTrade.builder()
+  private static final IborCollarTrade TRADE = IborCollarTrade.builder()
       .product(CAP_TWO_LEGS)
       .info(TRADE_INFO)
       .build();
-  static final ResolvedIborCapFloorTrade RTRADE = TRADE.resolve(REF_DATA);
+  static final ResolvedIborCollarTrade RTRADE = TRADE.resolve(REF_DATA);
 
-  private static final Currency CURRENCY = RTRADE.getProduct().getCapFloorLeg().getCurrency();
-  private static final IborIndex INDEX = RTRADE.getProduct().getCapFloorLeg().getIndex();
+  private static final Currency CURRENCY = RTRADE.getProduct().getCollarLeg().getCurrency();
+  private static final IborIndex INDEX = RTRADE.getProduct().getCollarLeg().getIndex();
   private static final LocalDate VAL_DATE = VOLS.getValuationDate();
   private static final CurveId DISCOUNT_CURVE_ID = CurveId.of("Default", "Discount");
   private static final CurveId FORWARD_CURVE_ID = CurveId.of("Default", "Forward");
-  private static final IborCapletFloorletVolatilitiesId VOL_ID =
-      IborCapletFloorletVolatilitiesId.of("IborCapFloorVols.Normal.USD");
+  private static final IborCollarletVolatilitiesId VOL_ID =
+      IborCollarletVolatilitiesId.of("IborCollarVols.Normal.USD");
   static final RatesMarketDataLookup RATES_LOOKUP = RatesMarketDataLookup.of(
       ImmutableMap.of(CURRENCY, DISCOUNT_CURVE_ID),
       ImmutableMap.of(INDEX, FORWARD_CURVE_ID));
-  static final IborCapFloorMarketDataLookup SWAPTION_LOOKUP = IborCapFloorMarketDataLookup.of(INDEX, VOL_ID);
+  static final IborCollarMarketDataLookup SWAPTION_LOOKUP = IborCollarMarketDataLookup.of(INDEX, VOL_ID);
   private static final CalculationParameters PARAMS = CalculationParameters.of(RATES_LOOKUP, SWAPTION_LOOKUP);
 
   //-------------------------------------------------------------------------
   @Test
   public void test_requirementsAndCurrency() {
-    IborCapFloorTradeCalculationFunction function = new IborCapFloorTradeCalculationFunction();
+    IborCollarTradeCalculationFunction function = new IborCollarTradeCalculationFunction();
     Set<Measure> measures = function.supportedMeasures();
     FunctionRequirements reqs = function.requirements(TRADE, measures, PARAMS, REF_DATA);
     assertThat(reqs.getOutputCurrencies()).containsOnly(CURRENCY);
@@ -111,10 +109,10 @@ public class IborCapFloorTradeCalculationFunctionTest {
 
   @Test
   public void test_simpleMeasures() {
-    IborCapFloorTradeCalculationFunction function = new IborCapFloorTradeCalculationFunction();
+    IborCollarTradeCalculationFunction function = new IborCollarTradeCalculationFunction();
     ScenarioMarketData md = marketData();
     RatesProvider provider = RATES_LOOKUP.ratesProvider(md.scenario(0));
-    NormalIborCapFloorTradePricer pricer = NormalIborCapFloorTradePricer.DEFAULT;
+    NormalIborCollarTradePricer pricer = NormalIborCollarTradePricer.DEFAULT;
     MultiCurrencyAmount expectedPv = pricer.presentValue(RTRADE, provider, VOLS);
     MultiCurrencyAmount expectedCurrencyExposure = pricer.currencyExposure(RTRADE, provider, VOLS);
     MultiCurrencyAmount expectedCurrentCash = pricer.currentCash(RTRADE, provider, VOLS);

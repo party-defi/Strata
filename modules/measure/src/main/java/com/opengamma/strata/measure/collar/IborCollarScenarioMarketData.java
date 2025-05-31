@@ -14,14 +14,14 @@ import com.opengamma.strata.data.scenario.ScenarioMarketData;
  * <p>
  * Implementations of this interface must be immutable.
  */
-public interface IborCapFloorScenarioMarketData {
+public interface IborCollarScenarioMarketData {
 
   /**
    * Gets the lookup that provides access to cap/floor volatilities.
    * 
    * @return the cap/floor lookup
    */
-  public abstract IborCapFloorMarketDataLookup getLookup();
+  public abstract IborCollarMarketDataLookup getLookup();
 
   /**
    * Gets the market data.
@@ -36,7 +36,7 @@ public interface IborCapFloorScenarioMarketData {
    * @param marketData  the market data to use
    * @return a market view based on the specified data
    */
-  public abstract IborCapFloorScenarioMarketData withMarketData(ScenarioMarketData marketData);
+  public abstract IborCollarScenarioMarketData withMarketData(ScenarioMarketData marketData);
 
   //-------------------------------------------------------------------------
   /**
@@ -55,6 +55,6 @@ public interface IborCapFloorScenarioMarketData {
    * @return the market data for the specified scenario
    * @throws IndexOutOfBoundsException if the scenario index is invalid
    */
-  public abstract IborCapFloorMarketData scenario(int scenarioIndex);
+  public abstract IborCollarMarketData scenario(int scenarioIndex);
 
 }

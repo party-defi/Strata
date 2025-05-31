@@ -19,8 +19,8 @@ import com.opengamma.strata.data.MarketData;
 import com.opengamma.strata.data.MarketDataId;
 import com.opengamma.strata.data.MarketDataNotFoundException;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilities;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilitiesId;
 
 /**
  * The lookup that provides access to cap/floor volatilities in market data.
@@ -33,7 +33,7 @@ import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
  * <p>
  * Implementations of this interface must be immutable.
  */
-public interface IborCapFloorMarketDataLookup extends CalculationParameter {
+public interface IborCollarMarketDataLookup extends CalculationParameter {
 
   /**
    * Obtains an instance based on a single mapping from index to volatility identifier.
@@ -44,7 +44,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @param volatilityId  the volatility identifier
    * @return the cap/floor lookup containing the specified mapping
    */
-  public static IborCapFloorMarketDataLookup of(IborIndex index, IborCapletFloorletVolatilitiesId volatilityId) {
+  public static IborCollarMarketDataLookup of(IborIndex index, IborCollarletVolatilitiesId volatilityId) {
     return DefaultIborCollarMarketDataLookup.of(ImmutableMap.of(index, volatilityId));
   }
 
@@ -56,7 +56,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @param volatilityIds  the volatility identifiers, keyed by index
    * @return the cap/floor lookup containing the specified volatilities
    */
-  public static IborCapFloorMarketDataLookup of(Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
+  public static IborCollarMarketDataLookup of(Map<IborIndex, IborCollarletVolatilitiesId> volatilityIds) {
     return DefaultIborCollarMarketDataLookup.of(volatilityIds);
   }
 
@@ -72,7 +72,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    */
   @Override
   public default Class<? extends CalculationParameter> queryType() {
-    return IborCapFloorMarketDataLookup.class;
+    return IborCollarMarketDataLookup.class;
   }
 
   //-------------------------------------------------------------------------
@@ -124,7 +124,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @param marketData  the complete set of market data for all scenarios
    * @return the filtered market data
    */
-  public default IborCapFloorScenarioMarketData marketDataView(ScenarioMarketData marketData) {
+  public default IborCollarScenarioMarketData marketDataView(ScenarioMarketData marketData) {
     return DefaultIborCollarScenarioMarketData.of(this, marketData);
   }
 
@@ -137,7 +137,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @param marketData  the complete set of market data for one scenario
    * @return the filtered market data
    */
-  public default IborCapFloorMarketData marketDataView(MarketData marketData) {
+  public default IborCollarMarketData marketDataView(MarketData marketData) {
     return DefaultIborCollarMarketData.of(this, marketData);
   }
 
@@ -145,15 +145,15 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
   /**
    * Obtains cap/floor volatilities based on the specified market data.
    * <p>
-   * This provides {@link IborCapletFloorletVolatilities} suitable for pricing a cap/floor.
+   * This provides {@link IborCollarletVolatilities} suitable for pricing a cap/floor.
    * Although this method can be used directly, it is typically invoked indirectly
-   * via {@link IborCapFloorMarketData}:
+   * via {@link IborCollarMarketData}:
    * <pre>
    *  // bind the baseData to this lookup
    *  IborCapFloorMarketData view = lookup.marketDataView(baseData);
    *  
    *  // pass around CapFloorMarketData within the function to use in pricing
-   *  IborCapletFloorletVolatilities vols = view.volatilities(index);
+   *  IborCollarletVolatilities vols = view.volatilities(index);
    * </pre>
    * 
    * @param index  the Ibor index
@@ -161,6 +161,6 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @return the volatilities
    * @throws MarketDataNotFoundException if the index is not found
    */
-  public abstract IborCapletFloorletVolatilities volatilities(IborIndex index, MarketData marketData);
+  public abstract IborCollarletVolatilities volatilities(IborIndex index, MarketData marketData);
 
 }

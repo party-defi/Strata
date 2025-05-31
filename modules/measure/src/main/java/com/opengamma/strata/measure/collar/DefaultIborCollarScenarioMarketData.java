@@ -24,17 +24,17 @@ import com.opengamma.strata.data.scenario.ScenarioMarketData;
 /**
  * The default market data for cap/floors, used for calculation across multiple scenarios.
  * <p>
- * This uses a {@link IborCapFloorMarketDataLookup} to provide a view on {@link ScenarioMarketData}.
+ * This uses a {@link IborCollarMarketDataLookup} to provide a view on {@link ScenarioMarketData}.
  */
 @BeanDefinition(style = "light")
 final class DefaultIborCollarScenarioMarketData
-    implements IborCapFloorScenarioMarketData, ImmutableBean, Serializable {
+    implements IborCollarScenarioMarketData, ImmutableBean, Serializable {
 
   /**
    * The lookup.
    */
   @PropertyDefinition(validate = "notNull", overrideGet = true)
-  private final IborCapFloorMarketDataLookup lookup;
+  private final IborCollarMarketDataLookup lookup;
   /**
    * The market data.
    */
@@ -43,7 +43,7 @@ final class DefaultIborCollarScenarioMarketData
   /**
    * The cache of single scenario instances.
    */
-  private final transient AtomicReferenceArray<IborCapFloorMarketData> cache;  // derived
+  private final transient AtomicReferenceArray<IborCollarMarketData> cache;  // derived
 
   //-------------------------------------------------------------------------
   /**
@@ -57,7 +57,7 @@ final class DefaultIborCollarScenarioMarketData
    * @return the rates market view
    */
   public static DefaultIborCollarScenarioMarketData of(
-      IborCapFloorMarketDataLookup lookup,
+      IborCollarMarketDataLookup lookup,
       ScenarioMarketData marketData) {
 
     return new DefaultIborCollarScenarioMarketData(lookup, marketData);
@@ -65,7 +65,7 @@ final class DefaultIborCollarScenarioMarketData
 
   @ImmutableConstructor
   private DefaultIborCollarScenarioMarketData(
-      IborCapFloorMarketDataLookup lookup,
+      IborCollarMarketDataLookup lookup,
       ScenarioMarketData marketData) {
 
     this.lookup = ArgChecker.notNull(lookup, "lookup");
@@ -80,7 +80,7 @@ final class DefaultIborCollarScenarioMarketData
 
   //-------------------------------------------------------------------------
   @Override
-  public IborCapFloorScenarioMarketData withMarketData(ScenarioMarketData marketData) {
+  public IborCollarScenarioMarketData withMarketData(ScenarioMarketData marketData) {
     return DefaultIborCollarScenarioMarketData.of(lookup, marketData);
   }
 
@@ -91,8 +91,8 @@ final class DefaultIborCollarScenarioMarketData
   }
 
   @Override
-  public IborCapFloorMarketData scenario(int scenarioIndex) {
-    IborCapFloorMarketData current = cache.get(scenarioIndex);
+  public IborCollarMarketData scenario(int scenarioIndex) {
+    IborCollarMarketData current = cache.get(scenarioIndex);
     if (current != null) {
       return current;
     }
@@ -142,7 +142,7 @@ final class DefaultIborCollarScenarioMarketData
    * @return the value of the property, not null
    */
   @Override
-  public IborCapFloorMarketDataLookup getLookup() {
+  public IborCollarMarketDataLookup getLookup() {
     return lookup;
   }
 

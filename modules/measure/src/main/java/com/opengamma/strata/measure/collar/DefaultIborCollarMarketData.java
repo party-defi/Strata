@@ -20,22 +20,22 @@ import org.joda.beans.impl.light.LightMetaBean;
 import com.opengamma.strata.basics.index.IborIndex;
 import com.opengamma.strata.collect.ArgChecker;
 import com.opengamma.strata.data.MarketData;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilities;
 
 /**
  * The default market data for cap/floors.
  * <p>
- * This uses a {@link IborCapFloorMarketDataLookup} to provide a view on {@link MarketData}.
+ * This uses a {@link IborCollarMarketDataLookup} to provide a view on {@link MarketData}.
  */
 @BeanDefinition(style = "light")
 final class DefaultIborCollarMarketData
-    implements IborCapFloorMarketData, ImmutableBean, Serializable {
+    implements IborCollarMarketData, ImmutableBean, Serializable {
 
   /**
    * The lookup.
    */
   @PropertyDefinition(validate = "notNull", overrideGet = true)
-  private final IborCapFloorMarketDataLookup lookup;
+  private final IborCollarMarketDataLookup lookup;
   /**
    * The market data.
    */
@@ -54,7 +54,7 @@ final class DefaultIborCollarMarketData
    * @return the rates market view
    */
   public static DefaultIborCollarMarketData of(
-      IborCapFloorMarketDataLookup lookup,
+      IborCollarMarketDataLookup lookup,
       MarketData marketData) {
 
     return new DefaultIborCollarMarketData(lookup, marketData);
@@ -62,7 +62,7 @@ final class DefaultIborCollarMarketData
 
   @ImmutableConstructor
   private DefaultIborCollarMarketData(
-      IborCapFloorMarketDataLookup lookup,
+      IborCollarMarketDataLookup lookup,
       MarketData marketData) {
 
     this.lookup = ArgChecker.notNull(lookup, "lookup");
@@ -71,13 +71,13 @@ final class DefaultIborCollarMarketData
 
   //-------------------------------------------------------------------------
   @Override
-  public IborCapFloorMarketData withMarketData(MarketData marketData) {
+  public IborCollarMarketData withMarketData(MarketData marketData) {
     return DefaultIborCollarMarketData.of(lookup, marketData);
   }
 
   //-------------------------------------------------------------------------
   @Override
-  public IborCapletFloorletVolatilities volatilities(IborIndex index) {
+  public IborCollarletVolatilities volatilities(IborIndex index) {
     return lookup.volatilities(index, marketData);
   }
 
@@ -122,7 +122,7 @@ final class DefaultIborCollarMarketData
    * @return the value of the property, not null
    */
   @Override
-  public IborCapFloorMarketDataLookup getLookup() {
+  public IborCollarMarketDataLookup getLookup() {
     return lookup;
   }
 

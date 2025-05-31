@@ -31,8 +31,8 @@ import com.opengamma.strata.data.MarketData;
 import com.opengamma.strata.data.MarketDataId;
 import com.opengamma.strata.data.MarketDataNotFoundException;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilities;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilitiesId;
 
 /**
  * The cap/floor lookup, used to select volatilities for pricing.
@@ -45,13 +45,13 @@ import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
  */
 @BeanDefinition(style = "light")
 final class DefaultIborCollarMarketDataLookup
-    implements IborCapFloorMarketDataLookup, ImmutableBean, Serializable {
+    implements IborCollarMarketDataLookup, ImmutableBean, Serializable {
 
   /**
    * The volatility identifiers, keyed by index.
    */
   @PropertyDefinition(validate = "notNull")
-  private final ImmutableMap<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds;
+  private final ImmutableMap<IborIndex, IborCollarletVolatilitiesId> volatilityIds;
 
   //-------------------------------------------------------------------------
   /**
@@ -63,7 +63,7 @@ final class DefaultIborCollarMarketDataLookup
    * @param volatilityId  the volatility identifier
    * @return the cap/floor lookup containing the specified mapping
    */
-  public static DefaultIborCollarMarketDataLookup of(IborIndex index, IborCapletFloorletVolatilitiesId volatilityId) {
+  public static DefaultIborCollarMarketDataLookup of(IborIndex index, IborCollarletVolatilitiesId volatilityId) {
     return new DefaultIborCollarMarketDataLookup(ImmutableMap.of(index, volatilityId));
   }
 
@@ -75,7 +75,7 @@ final class DefaultIborCollarMarketDataLookup
    * @param volatilityIds  the volatility identifiers, keyed by index
    * @return the cap/floor lookup containing the specified volatilities
    */
-  public static DefaultIborCollarMarketDataLookup of(Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
+  public static DefaultIborCollarMarketDataLookup of(Map<IborIndex, IborCollarletVolatilitiesId> volatilityIds) {
     return new DefaultIborCollarMarketDataLookup(volatilityIds);
   }
 
@@ -87,7 +87,7 @@ final class DefaultIborCollarMarketDataLookup
 
   @Override
   public ImmutableSet<MarketDataId<?>> getVolatilityIds(IborIndex index) {
-    IborCapletFloorletVolatilitiesId id = volatilityIds.get(index);
+    IborCollarletVolatilitiesId id = volatilityIds.get(index);
     if (id == null) {
       throw new IllegalArgumentException(msgIndexNotFound(index));
     }
@@ -97,7 +97,7 @@ final class DefaultIborCollarMarketDataLookup
   //-------------------------------------------------------------------------
   @Override
   public FunctionRequirements requirements(Set<IborIndex> indices) {
-    ImmutableSet.Builder<IborCapletFloorletVolatilitiesId> requiredIndices = ImmutableSet.builder();
+    ImmutableSet.Builder<IborCollarletVolatilitiesId> requiredIndices = ImmutableSet.builder();
     for (IborIndex index : indices) {
       if (!volatilityIds.containsKey(index)) {
         throw new IllegalArgumentException(msgIndexNotFound(index));
@@ -111,8 +111,8 @@ final class DefaultIborCollarMarketDataLookup
 
   //-------------------------------------------------------------------------
   @Override
-  public IborCapletFloorletVolatilities volatilities(IborIndex index, MarketData marketData) {
-    IborCapletFloorletVolatilitiesId volatilityId = volatilityIds.get(index);
+  public IborCollarletVolatilities volatilities(IborIndex index, MarketData marketData) {
+    IborCollarletVolatilitiesId volatilityId = volatilityIds.get(index);
     if (volatilityId == null) {
       throw new MarketDataNotFoundException(msgIndexNotFound(index));
     }
@@ -154,7 +154,7 @@ final class DefaultIborCollarMarketDataLookup
   private static final long serialVersionUID = 1L;
 
   private DefaultIborCollarMarketDataLookup(
-      Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
+      Map<IborIndex, IborCollarletVolatilitiesId> volatilityIds) {
     JodaBeanUtils.notNull(volatilityIds, "volatilityIds");
     this.volatilityIds = ImmutableMap.copyOf(volatilityIds);
   }
@@ -169,7 +169,7 @@ final class DefaultIborCollarMarketDataLookup
    * Gets the volatility identifiers, keyed by index.
    * @return the value of the property, not null
    */
-  public ImmutableMap<IborIndex, IborCapletFloorletVolatilitiesId> getVolatilityIds() {
+  public ImmutableMap<IborIndex, IborCollarletVolatilitiesId> getVolatilityIds() {
     return volatilityIds;
   }
 

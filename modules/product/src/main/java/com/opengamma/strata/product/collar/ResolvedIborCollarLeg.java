@@ -208,7 +208,7 @@ public final class ResolvedIborCollarLeg
    * is essentially independent the data model allows overlapping periods.
    * @return the value of the property, not empty
    */
-  public ImmutableList<IborCollarletPeriod> getCapletFloorletPeriods() {
+  public ImmutableList<IborCollarletPeriod> getCollarletPeriods() {
     return collarletPeriods;
   }
 
@@ -337,7 +337,7 @@ public final class ResolvedIborCollarLeg
         case -885469925:  // payReceive
           return ((ResolvedIborCollarLeg) bean).getPayReceive();
         case 1504863482:  // collarletPeriods
-          return ((ResolvedIborCollarLeg) bean).getCapletFloorletPeriods();
+          return ((ResolvedIborCollarLeg) bean).getCollarletPeriods();
       }
       return super.propertyGet(bean, propertyName, quiet);
     }
@@ -374,7 +374,7 @@ public final class ResolvedIborCollarLeg
      */
     private Builder(ResolvedIborCollarLeg beanToCopy) {
       this.payReceive = beanToCopy.getPayReceive();
-      this.collarletPeriods = beanToCopy.getCapletFloorletPeriods();
+      this.collarletPeriods = beanToCopy.getCollarletPeriods();
     }
 
     //-----------------------------------------------------------------------
