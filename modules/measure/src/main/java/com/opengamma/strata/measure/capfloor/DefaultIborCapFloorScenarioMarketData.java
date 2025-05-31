@@ -5,8 +5,10 @@
  */
 package com.opengamma.strata.measure.capfloor;
 
-import com.opengamma.strata.collect.ArgChecker;
-import com.opengamma.strata.data.scenario.ScenarioMarketData;
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+
 import org.joda.beans.ImmutableBean;
 import org.joda.beans.JodaBeanUtils;
 import org.joda.beans.MetaBean;
@@ -16,9 +18,8 @@ import org.joda.beans.gen.ImmutableConstructor;
 import org.joda.beans.gen.PropertyDefinition;
 import org.joda.beans.impl.light.LightMetaBean;
 
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.util.concurrent.atomic.AtomicReferenceArray;
+import com.opengamma.strata.collect.ArgChecker;
+import com.opengamma.strata.data.scenario.ScenarioMarketData;
 
 /**
  * The default market data for cap/floors, used for calculation across multiple scenarios.

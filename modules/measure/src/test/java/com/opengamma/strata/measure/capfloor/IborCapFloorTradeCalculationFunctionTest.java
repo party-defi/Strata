@@ -5,6 +5,20 @@
  */
 package com.opengamma.strata.measure.capfloor;
 
+import static com.opengamma.strata.basics.date.DayCounts.ACT_360;
+import static com.opengamma.strata.basics.index.IborIndices.EUR_EURIBOR_6M;
+import static com.opengamma.strata.collect.TestHelper.dateUtc;
+import static com.opengamma.strata.product.common.PayReceive.PAY;
+import static com.opengamma.strata.product.common.PayReceive.RECEIVE;
+import static com.opengamma.strata.product.common.PutCall.CALL;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -25,11 +39,13 @@ import com.opengamma.strata.market.curve.CurveId;
 import com.opengamma.strata.market.curve.Curves;
 import com.opengamma.strata.market.observable.IndexQuoteId;
 import com.opengamma.strata.measure.Measures;
-import com.opengamma.strata.measure.collar.IborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorTradeCalculationFunction;
 import com.opengamma.strata.measure.curve.TestMarketDataMap;
 import com.opengamma.strata.measure.rate.RatesMarketDataLookup;
-import com.opengamma.strata.pricer.capfloor.*;
+import com.opengamma.strata.pricer.capfloor.IborCapFloorDataSet;
+import com.opengamma.strata.pricer.capfloor.IborCapletFloorletDataSet;
+import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
+import com.opengamma.strata.pricer.capfloor.NormalIborCapFloorTradePricer;
+import com.opengamma.strata.pricer.capfloor.NormalIborCapletFloorletExpiryStrikeVolatilities;
 import com.opengamma.strata.pricer.rate.RatesProvider;
 import com.opengamma.strata.product.TradeInfo;
 import com.opengamma.strata.product.capfloor.IborCapFloor;
@@ -37,19 +53,6 @@ import com.opengamma.strata.product.capfloor.IborCapFloorLeg;
 import com.opengamma.strata.product.capfloor.IborCapFloorTrade;
 import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
 import com.opengamma.strata.product.swap.SwapLeg;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Set;
-
-import static com.opengamma.strata.basics.date.DayCounts.ACT_360;
-import static com.opengamma.strata.basics.index.IborIndices.EUR_EURIBOR_6M;
-import static com.opengamma.strata.collect.TestHelper.dateUtc;
-import static com.opengamma.strata.product.common.PayReceive.PAY;
-import static com.opengamma.strata.product.common.PayReceive.RECEIVE;
-import static com.opengamma.strata.product.common.PutCall.CALL;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test {@link IborCapFloorTradeCalculationFunction}.

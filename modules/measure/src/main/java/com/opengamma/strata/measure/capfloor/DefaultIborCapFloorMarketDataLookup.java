@@ -5,6 +5,20 @@
  */
 package com.opengamma.strata.measure.capfloor;
 
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import org.joda.beans.ImmutableBean;
+import org.joda.beans.JodaBeanUtils;
+import org.joda.beans.MetaBean;
+import org.joda.beans.TypedMetaBean;
+import org.joda.beans.gen.BeanDefinition;
+import org.joda.beans.gen.PropertyDefinition;
+import org.joda.beans.impl.light.LightMetaBean;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.opengamma.strata.basics.index.IborIndex;
@@ -19,19 +33,6 @@ import com.opengamma.strata.data.MarketDataNotFoundException;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
-import org.joda.beans.ImmutableBean;
-import org.joda.beans.JodaBeanUtils;
-import org.joda.beans.MetaBean;
-import org.joda.beans.TypedMetaBean;
-import org.joda.beans.gen.BeanDefinition;
-import org.joda.beans.gen.PropertyDefinition;
-import org.joda.beans.impl.light.LightMetaBean;
-
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * The cap/floor lookup, used to select volatilities for pricing.

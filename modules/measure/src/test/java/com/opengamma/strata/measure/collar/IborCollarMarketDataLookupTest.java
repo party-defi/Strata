@@ -19,10 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
-import com.opengamma.strata.measure.collar.DefaultIborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorMarketData;
-import com.opengamma.strata.measure.collar.IborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorScenarioMarketData;
+import com.opengamma.strata.measure.collar.DefaultIborCollarMarketDataLookup;
 import org.joda.beans.ImmutableBean;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +36,7 @@ import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
 /**
  * Test {@link IborCapFloorMarketDataLookup}.
  */
-public class IborCapFloorMarketDataLookupTest {
+public class IborCollarMarketDataLookupTest {
 
   private static final IborCapletFloorletVolatilitiesId VOL_ID1 = IborCapletFloorletVolatilitiesId.of("USD1");
   private static final IborCapletFloorletVolatilitiesId VOL_ID2 = IborCapletFloorletVolatilitiesId.of("USD2");
@@ -108,10 +105,10 @@ public class IborCapFloorMarketDataLookupTest {
   //-------------------------------------------------------------------------
   @Test
   public void coverage() {
-    DefaultIborCapFloorMarketDataLookup test =
-        DefaultIborCapFloorMarketDataLookup.of(ImmutableMap.of(USD_LIBOR_3M, VOL_ID1, USD_LIBOR_6M, VOL_ID1));
+    DefaultIborCollarMarketDataLookup test =
+        DefaultIborCollarMarketDataLookup.of(ImmutableMap.of(USD_LIBOR_3M, VOL_ID1, USD_LIBOR_6M, VOL_ID1));
     coverImmutableBean(test);
-    DefaultIborCapFloorMarketDataLookup test2 = DefaultIborCapFloorMarketDataLookup.of(USD_LIBOR_3M, VOL_ID1);
+    DefaultIborCollarMarketDataLookup test2 = DefaultIborCollarMarketDataLookup.of(USD_LIBOR_3M, VOL_ID1);
     coverBeanEquals(test, test2);
 
     coverImmutableBean((ImmutableBean) test.marketDataView(MOCK_CALC_MARKET_DATA));
@@ -120,8 +117,8 @@ public class IborCapFloorMarketDataLookupTest {
 
   @Test
   public void test_serialization() {
-    DefaultIborCapFloorMarketDataLookup test =
-        DefaultIborCapFloorMarketDataLookup.of(ImmutableMap.of(USD_LIBOR_3M, VOL_ID1, USD_LIBOR_6M, VOL_ID1));
+    DefaultIborCollarMarketDataLookup test =
+        DefaultIborCollarMarketDataLookup.of(ImmutableMap.of(USD_LIBOR_3M, VOL_ID1, USD_LIBOR_6M, VOL_ID1));
     assertSerialization(test);
   }
 
