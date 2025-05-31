@@ -3,7 +3,10 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
+
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -18,9 +21,6 @@ import com.opengamma.strata.data.MarketDataNotFoundException;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The lookup that provides access to cap/floor volatilities in market data.
@@ -45,7 +45,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @return the cap/floor lookup containing the specified mapping
    */
   public static IborCapFloorMarketDataLookup of(IborIndex index, IborCapletFloorletVolatilitiesId volatilityId) {
-    return DefaultIborCapFloorMarketDataLookup.of(ImmutableMap.of(index, volatilityId));
+    return DefaultIborCollarMarketDataLookup.of(ImmutableMap.of(index, volatilityId));
   }
 
   /**
@@ -57,7 +57,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @return the cap/floor lookup containing the specified volatilities
    */
   public static IborCapFloorMarketDataLookup of(Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
-    return DefaultIborCapFloorMarketDataLookup.of(volatilityIds);
+    return DefaultIborCollarMarketDataLookup.of(volatilityIds);
   }
 
   //-------------------------------------------------------------------------
@@ -125,7 +125,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @return the filtered market data
    */
   public default IborCapFloorScenarioMarketData marketDataView(ScenarioMarketData marketData) {
-    return DefaultIborCapFloorScenarioMarketData.of(this, marketData);
+    return DefaultIborCollarScenarioMarketData.of(this, marketData);
   }
 
   /**
@@ -138,7 +138,7 @@ public interface IborCapFloorMarketDataLookup extends CalculationParameter {
    * @return the filtered market data
    */
   public default IborCapFloorMarketData marketDataView(MarketData marketData) {
-    return DefaultIborCapFloorMarketData.of(this, marketData);
+    return DefaultIborCollarMarketData.of(this, marketData);
   }
 
   //-------------------------------------------------------------------------

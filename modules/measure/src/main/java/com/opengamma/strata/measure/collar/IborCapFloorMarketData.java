@@ -3,14 +3,14 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
+
+import java.time.LocalDate;
 
 import com.opengamma.strata.basics.index.IborIndex;
 import com.opengamma.strata.data.MarketData;
 import com.opengamma.strata.data.MarketDataNotFoundException;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
-
-import java.time.LocalDate;
 
 /**
  * Market data for Ibor cap/floor.

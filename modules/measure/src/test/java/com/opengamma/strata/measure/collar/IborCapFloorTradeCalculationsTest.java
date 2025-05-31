@@ -3,7 +3,11 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.opengamma.strata.basics.currency.MultiCurrencyAmount;
@@ -12,16 +16,11 @@ import com.opengamma.strata.data.scenario.ScenarioArray;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
 import com.opengamma.strata.market.param.CurrencyParameterSensitivities;
 import com.opengamma.strata.market.sensitivity.PointSensitivities;
-import com.opengamma.strata.measure.collar.IborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorTradeCalculations;
 import com.opengamma.strata.measure.rate.RatesMarketDataLookup;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
 import com.opengamma.strata.pricer.capfloor.VolatilityIborCapFloorTradePricer;
 import com.opengamma.strata.pricer.rate.RatesProvider;
 import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test {@link IborCapFloorTradeCalculations}.

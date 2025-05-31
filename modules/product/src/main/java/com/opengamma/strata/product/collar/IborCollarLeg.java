@@ -48,16 +48,14 @@ import com.opengamma.strata.product.swap.FixingRelativeTo;
 import com.opengamma.strata.product.swap.IborRateCalculation;
 
 /**
- * An Ibor cap/floor leg of a cap/floor product.
+ * An Ibor collar leg of a collar product.
  * <p>
- * This defines a single cap/floor leg for an Ibor cap/floor product.
- * The cap/floor instruments are defined as a set of call/put options on successive Ibor index rates,
- * known as Ibor caplets/floorlets.
+ * This defines a single collar leg for an Ibor collar product.
+ * The collar instruments are defined as a set of call/put options on successive Ibor index rates,
+ * known as Ibor collarlets.
  * <p>
- * The periodic payments in the resolved leg are caplets or floorlets depending on the data in this leg.
- * The {@code capSchedule} field is used to represent strike values of individual caplets,
- * whereas {@code floorSchedule} is used to represent strike values of individual floorlets.
- * Either {@code capSchedule} or {@code floorSchedule} must be present, and not both.
+ * The periodic payments in the resolved leg are collarlets or floorlets depending on the data in this leg.
+ * The {@code capSchedule} field is used to represent strike values of individual collarlets.
  */
 @BeanDefinition
 public final class IborCollarLeg
@@ -111,27 +109,14 @@ public final class IborCollarLeg
   @PropertyDefinition(validate = "notNull")
   private final IborRateCalculation calculation;
   /**
-   * The cap schedule, optional.
+   * The collar schedule, optional.
    * <p>
    * This defines the strike value of a cap as an initial value and a list of adjustments.
-   * Thus individual caplets may have different strike values.
-   * The cap rate is only allowed to change at payment period boundaries.
-   * <p>
-   * If the product is not a cap, the cap schedule will be absent.
+   * Thus individual collarlets may have different strike values.
+   * The collar rate is only allowed to change at payment period boundaries.
    */
   @PropertyDefinition(get = "optional")
-  private final ValueSchedule capSchedule;
-  /**
-   * The floor schedule, optional.
-   * <p>
-   * This defines the strike value of a floor as an initial value and a list of adjustments.
-   * Thus individual floorlets may have different strike values.
-   * The floor rate is only allowed to change at payment period boundaries.
-   * <p>
-   * If the product is not a floor, the floor schedule will be absent.
-   */
-  @PropertyDefinition(get = "optional")
-  private final ValueSchedule floorSchedule;
+  private final ValueSchedule collarSchedule;
 
   //-------------------------------------------------------------------------
   @ImmutableDefaults
@@ -147,20 +132,16 @@ public final class IborCollarLeg
       Currency currency,
       ValueSchedule notional,
       IborRateCalculation calculation,
-      ValueSchedule capSchedule,
-      ValueSchedule floorSchedule) {
+      ValueSchedule collarSchedule) {
     this.payReceive = ArgChecker.notNull(payReceive, "payReceive");
     this.paymentSchedule = ArgChecker.notNull(paymentSchedule, "paymentSchedule");
     this.paymentDateOffset = ArgChecker.notNull(paymentDateOffset, "paymentDateOffset");
     this.currency = currency != null ? currency : calculation.getIndex().getCurrency();
     this.notional = notional;
     this.calculation = ArgChecker.notNull(calculation, "calculation");
-    this.capSchedule = capSchedule;
-    this.floorSchedule = floorSchedule;
+    this.collarSchedule = collarSchedule;
     ArgChecker.isTrue(!this.getPaymentSchedule().getStubConvention().isPresent() ||
         this.getPaymentSchedule().getStubConvention().get().equals(StubConvention.NONE), "Stub period is not allowed");
-    ArgChecker.isFalse(this.getCapSchedule().isPresent() && this.getFloorSchedule().isPresent(),
-        "Both cap schedule and floor schedule should be present");
     ArgChecker.isTrue(this.getCalculation().getIndex().getTenor().getPeriod().equals(this.getPaymentSchedule()
         .getFrequency().getPeriod()), "Payment frequency period should be the same as index tenor period");
   }
@@ -204,8 +185,7 @@ public final class IborCollarLeg
   @Override
   public ResolvedIborCollarLeg resolve(ReferenceData refData) {
     Schedule adjustedSchedule = paymentSchedule.createSchedule(refData);
-    DoubleArray cap = getCapSchedule().isPresent() ? capSchedule.resolveValues(adjustedSchedule) : null;
-    DoubleArray floor = getFloorSchedule().isPresent() ? floorSchedule.resolveValues(adjustedSchedule) : null;
+    DoubleArray cap = getCollarSchedule().isPresent() ? collarSchedule.resolveValues(adjustedSchedule) : null;
     DoubleArray notionals = notional.resolveValues(adjustedSchedule);
     DateAdjuster fixingDateAdjuster = calculation.getFixingDateOffset().resolve(refData);
     DateAdjuster paymentDateAdjuster = paymentDateOffset.resolve(refData);
@@ -230,7 +210,6 @@ public final class IborCollarLeg
           .currency(currency)
           .yearFraction(period.yearFraction(calculation.getDayCount(), adjustedSchedule))
           .caplet(cap != null ? cap.get(i) : null)
-          .floorlet(floor != null ? floor.get(i) : null)
           .build());
     }
     return ResolvedIborCollarLeg.builder()
@@ -346,29 +325,14 @@ public final class IborCollarLeg
    * Gets the cap schedule, optional.
    * <p>
    * This defines the strike value of a cap as an initial value and a list of adjustments.
-   * Thus individual caplets may have different strike values.
+   * Thus individual collarlets may have different strike values.
    * The cap rate is only allowed to change at payment period boundaries.
    * <p>
    * If the product is not a cap, the cap schedule will be absent.
    * @return the optional value of the property, not null
    */
-  public Optional<ValueSchedule> getCapSchedule() {
-    return Optional.ofNullable(capSchedule);
-  }
-
-  //-----------------------------------------------------------------------
-  /**
-   * Gets the floor schedule, optional.
-   * <p>
-   * This defines the strike value of a floor as an initial value and a list of adjustments.
-   * Thus individual floorlets may have different strike values.
-   * The floor rate is only allowed to change at payment period boundaries.
-   * <p>
-   * If the product is not a floor, the floor schedule will be absent.
-   * @return the optional value of the property, not null
-   */
-  public Optional<ValueSchedule> getFloorSchedule() {
-    return Optional.ofNullable(floorSchedule);
+  public Optional<ValueSchedule> getCollarSchedule() {
+    return Optional.ofNullable(collarSchedule);
   }
 
   //-----------------------------------------------------------------------
@@ -393,8 +357,7 @@ public final class IborCollarLeg
           JodaBeanUtils.equal(currency, other.currency) &&
           JodaBeanUtils.equal(notional, other.notional) &&
           JodaBeanUtils.equal(calculation, other.calculation) &&
-          JodaBeanUtils.equal(capSchedule, other.capSchedule) &&
-          JodaBeanUtils.equal(floorSchedule, other.floorSchedule);
+          JodaBeanUtils.equal(collarSchedule, other.collarSchedule);
     }
     return false;
   }
@@ -408,8 +371,7 @@ public final class IborCollarLeg
     hash = hash * 31 + JodaBeanUtils.hashCode(currency);
     hash = hash * 31 + JodaBeanUtils.hashCode(notional);
     hash = hash * 31 + JodaBeanUtils.hashCode(calculation);
-    hash = hash * 31 + JodaBeanUtils.hashCode(capSchedule);
-    hash = hash * 31 + JodaBeanUtils.hashCode(floorSchedule);
+    hash = hash * 31 + JodaBeanUtils.hashCode(collarSchedule);
     return hash;
   }
 
@@ -423,8 +385,7 @@ public final class IborCollarLeg
     buf.append("currency").append('=').append(JodaBeanUtils.toString(currency)).append(',').append(' ');
     buf.append("notional").append('=').append(JodaBeanUtils.toString(notional)).append(',').append(' ');
     buf.append("calculation").append('=').append(JodaBeanUtils.toString(calculation)).append(',').append(' ');
-    buf.append("capSchedule").append('=').append(JodaBeanUtils.toString(capSchedule)).append(',').append(' ');
-    buf.append("floorSchedule").append('=').append(JodaBeanUtils.toString(floorSchedule));
+    buf.append("capSchedule").append('=').append(JodaBeanUtils.toString(collarSchedule)).append(',').append(' ');
     buf.append('}');
     return buf.toString();
   }
@@ -619,9 +580,7 @@ public final class IborCollarLeg
         case -934682935:  // calculation
           return ((IborCollarLeg) bean).getCalculation();
         case -596212599:  // capSchedule
-          return ((IborCollarLeg) bean).capSchedule;
-        case -1562227005:  // floorSchedule
-          return ((IborCollarLeg) bean).floorSchedule;
+          return ((IborCollarLeg) bean).collarSchedule;
       }
       return super.propertyGet(bean, propertyName, quiet);
     }
@@ -649,8 +608,7 @@ public final class IborCollarLeg
     private Currency currency;
     private ValueSchedule notional;
     private IborRateCalculation calculation;
-    private ValueSchedule capSchedule;
-    private ValueSchedule floorSchedule;
+    private ValueSchedule collarSchedule;
 
     /**
      * Restricted constructor.
@@ -670,8 +628,7 @@ public final class IborCollarLeg
       this.currency = beanToCopy.getCurrency();
       this.notional = beanToCopy.getNotional();
       this.calculation = beanToCopy.getCalculation();
-      this.capSchedule = beanToCopy.capSchedule;
-      this.floorSchedule = beanToCopy.floorSchedule;
+      this.collarSchedule = beanToCopy.collarSchedule;
     }
 
     //-----------------------------------------------------------------------
@@ -691,9 +648,8 @@ public final class IborCollarLeg
         case -934682935:  // calculation
           return calculation;
         case -596212599:  // capSchedule
-          return capSchedule;
-        case -1562227005:  // floorSchedule
-          return floorSchedule;
+          return collarSchedule;
+
         default:
           throw new NoSuchElementException("Unknown property: " + propertyName);
       }
@@ -721,10 +677,7 @@ public final class IborCollarLeg
           this.calculation = (IborRateCalculation) newValue;
           break;
         case -596212599:  // capSchedule
-          this.capSchedule = (ValueSchedule) newValue;
-          break;
-        case -1562227005:  // floorSchedule
-          this.floorSchedule = (ValueSchedule) newValue;
+          this.collarSchedule = (ValueSchedule) newValue;
           break;
         default:
           throw new NoSuchElementException("Unknown property: " + propertyName);
@@ -747,8 +700,7 @@ public final class IborCollarLeg
           currency,
           notional,
           calculation,
-          capSchedule,
-          floorSchedule);
+              collarSchedule);
     }
 
     //-----------------------------------------------------------------------
@@ -836,18 +788,18 @@ public final class IborCollarLeg
     }
 
     /**
-     * Sets the cap schedule, optional.
+     * Sets the collar schedule, optional.
      * <p>
      * This defines the strike value of a cap as an initial value and a list of adjustments.
-     * Thus individual caplets may have different strike values.
-     * The cap rate is only allowed to change at payment period boundaries.
+     * Thus individual collarlets may have different strike values.
+     * The collar rate is only allowed to change at payment period boundaries.
      * <p>
      * If the product is not a cap, the cap schedule will be absent.
      * @param collarSchedule  the new value
      * @return this, for chaining, not null
      */
     public Builder collarSchedule(ValueSchedule collarSchedule) {
-      this.capSchedule = collarSchedule;
+      this.collarSchedule = collarSchedule;
       return this;
     }
 
@@ -862,8 +814,7 @@ public final class IborCollarLeg
       buf.append("currency").append('=').append(JodaBeanUtils.toString(currency)).append(',').append(' ');
       buf.append("notional").append('=').append(JodaBeanUtils.toString(notional)).append(',').append(' ');
       buf.append("calculation").append('=').append(JodaBeanUtils.toString(calculation)).append(',').append(' ');
-      buf.append("capSchedule").append('=').append(JodaBeanUtils.toString(capSchedule)).append(',').append(' ');
-      buf.append("floorSchedule").append('=').append(JodaBeanUtils.toString(floorSchedule));
+      buf.append("capSchedule").append('=').append(JodaBeanUtils.toString(collarSchedule)).append(',').append(' ');
       buf.append('}');
       return buf.toString();
     }

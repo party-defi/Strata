@@ -3,7 +3,28 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
+
+import static com.opengamma.strata.basics.index.IborIndices.GBP_LIBOR_3M;
+import static com.opengamma.strata.basics.index.IborIndices.USD_LIBOR_3M;
+import static com.opengamma.strata.basics.index.IborIndices.USD_LIBOR_6M;
+import static com.opengamma.strata.collect.TestHelper.assertSerialization;
+import static com.opengamma.strata.collect.TestHelper.coverBeanEquals;
+import static com.opengamma.strata.collect.TestHelper.coverImmutableBean;
+import static com.opengamma.strata.collect.TestHelper.date;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+
+import com.opengamma.strata.measure.collar.DefaultIborCapFloorMarketDataLookup;
+import com.opengamma.strata.measure.collar.IborCapFloorMarketData;
+import com.opengamma.strata.measure.collar.IborCapFloorMarketDataLookup;
+import com.opengamma.strata.measure.collar.IborCapFloorScenarioMarketData;
+import org.joda.beans.ImmutableBean;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -11,24 +32,9 @@ import com.opengamma.strata.basics.index.IborIndex;
 import com.opengamma.strata.calc.runner.FunctionRequirements;
 import com.opengamma.strata.data.MarketData;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
-import com.opengamma.strata.measure.collar.DefaultIborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorMarketData;
-import com.opengamma.strata.measure.collar.IborCapFloorMarketDataLookup;
-import com.opengamma.strata.measure.collar.IborCapFloorScenarioMarketData;
 import com.opengamma.strata.measure.curve.TestMarketDataMap;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
-import org.joda.beans.ImmutableBean;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-
-import static com.opengamma.strata.basics.index.IborIndices.*;
-import static com.opengamma.strata.collect.TestHelper.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Test {@link IborCapFloorMarketDataLookup}.

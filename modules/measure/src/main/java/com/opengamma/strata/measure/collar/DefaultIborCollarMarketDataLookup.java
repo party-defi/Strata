@@ -3,7 +3,21 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
+
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import org.joda.beans.ImmutableBean;
+import org.joda.beans.JodaBeanUtils;
+import org.joda.beans.MetaBean;
+import org.joda.beans.TypedMetaBean;
+import org.joda.beans.gen.BeanDefinition;
+import org.joda.beans.gen.PropertyDefinition;
+import org.joda.beans.impl.light.LightMetaBean;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -19,19 +33,6 @@ import com.opengamma.strata.data.MarketDataNotFoundException;
 import com.opengamma.strata.data.scenario.ScenarioMarketData;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
 import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilitiesId;
-import org.joda.beans.ImmutableBean;
-import org.joda.beans.JodaBeanUtils;
-import org.joda.beans.MetaBean;
-import org.joda.beans.TypedMetaBean;
-import org.joda.beans.gen.BeanDefinition;
-import org.joda.beans.gen.PropertyDefinition;
-import org.joda.beans.impl.light.LightMetaBean;
-
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * The cap/floor lookup, used to select volatilities for pricing.
@@ -43,7 +44,7 @@ import java.util.Set;
  * data that the function needs and the data that is available in {@link ScenarioMarketData}.
  */
 @BeanDefinition(style = "light")
-final class DefaultIborCapFloorMarketDataLookup
+final class DefaultIborCollarMarketDataLookup
     implements IborCapFloorMarketDataLookup, ImmutableBean, Serializable {
 
   /**
@@ -62,8 +63,8 @@ final class DefaultIborCapFloorMarketDataLookup
    * @param volatilityId  the volatility identifier
    * @return the cap/floor lookup containing the specified mapping
    */
-  public static DefaultIborCapFloorMarketDataLookup of(IborIndex index, IborCapletFloorletVolatilitiesId volatilityId) {
-    return new DefaultIborCapFloorMarketDataLookup(ImmutableMap.of(index, volatilityId));
+  public static DefaultIborCollarMarketDataLookup of(IborIndex index, IborCapletFloorletVolatilitiesId volatilityId) {
+    return new DefaultIborCollarMarketDataLookup(ImmutableMap.of(index, volatilityId));
   }
 
   /**
@@ -74,8 +75,8 @@ final class DefaultIborCapFloorMarketDataLookup
    * @param volatilityIds  the volatility identifiers, keyed by index
    * @return the cap/floor lookup containing the specified volatilities
    */
-  public static DefaultIborCapFloorMarketDataLookup of(Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
-    return new DefaultIborCapFloorMarketDataLookup(volatilityIds);
+  public static DefaultIborCollarMarketDataLookup of(Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
+    return new DefaultIborCollarMarketDataLookup(volatilityIds);
   }
 
   //-------------------------------------------------------------------------
@@ -127,9 +128,9 @@ final class DefaultIborCapFloorMarketDataLookup
   /**
    * The meta-bean for {@code DefaultIborCapFloorMarketDataLookup}.
    */
-  private static final TypedMetaBean<DefaultIborCapFloorMarketDataLookup> META_BEAN =
+  private static final TypedMetaBean<DefaultIborCollarMarketDataLookup> META_BEAN =
       LightMetaBean.of(
-          DefaultIborCapFloorMarketDataLookup.class,
+          DefaultIborCollarMarketDataLookup.class,
           MethodHandles.lookup(),
           new String[] {
               "volatilityIds"},
@@ -139,7 +140,7 @@ final class DefaultIborCapFloorMarketDataLookup
    * The meta-bean for {@code DefaultIborCapFloorMarketDataLookup}.
    * @return the meta-bean, not null
    */
-  public static TypedMetaBean<DefaultIborCapFloorMarketDataLookup> meta() {
+  public static TypedMetaBean<DefaultIborCollarMarketDataLookup> meta() {
     return META_BEAN;
   }
 
@@ -152,14 +153,14 @@ final class DefaultIborCapFloorMarketDataLookup
    */
   private static final long serialVersionUID = 1L;
 
-  private DefaultIborCapFloorMarketDataLookup(
+  private DefaultIborCollarMarketDataLookup(
       Map<IborIndex, IborCapletFloorletVolatilitiesId> volatilityIds) {
     JodaBeanUtils.notNull(volatilityIds, "volatilityIds");
     this.volatilityIds = ImmutableMap.copyOf(volatilityIds);
   }
 
   @Override
-  public TypedMetaBean<DefaultIborCapFloorMarketDataLookup> metaBean() {
+  public TypedMetaBean<DefaultIborCollarMarketDataLookup> metaBean() {
     return META_BEAN;
   }
 
@@ -179,7 +180,7 @@ final class DefaultIborCapFloorMarketDataLookup
       return true;
     }
     if (obj != null && obj.getClass() == this.getClass()) {
-      DefaultIborCapFloorMarketDataLookup other = (DefaultIborCapFloorMarketDataLookup) obj;
+      DefaultIborCollarMarketDataLookup other = (DefaultIborCollarMarketDataLookup) obj;
       return JodaBeanUtils.equal(volatilityIds, other.volatilityIds);
     }
     return false;

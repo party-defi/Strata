@@ -31,7 +31,6 @@ import com.opengamma.strata.product.ProductTrade;
 import com.opengamma.strata.product.ProductType;
 import com.opengamma.strata.product.ResolvableTrade;
 import com.opengamma.strata.product.TradeInfo;
-import com.opengamma.strata.product.collar.IborCollarLeg;
 import com.opengamma.strata.product.common.SummarizerUtils;
 
 /**
@@ -111,13 +110,9 @@ public final class IborCollarTrade
   private void summarizeMainLeg(IborCollarLeg mainLeg, StringBuilder buf) {
     buf.append(mainLeg.getIndex());
     buf.append(' ');
-    if (mainLeg.getCapSchedule().isPresent()) {
+    if (mainLeg.getCollarSchedule().isPresent()) {
       buf.append("Cap ");
-      buf.append(SummarizerUtils.percent(mainLeg.getCapSchedule().get().getInitialValue()));
-    }
-    if (mainLeg.getFloorSchedule().isPresent()) {
-      buf.append("Floor ");
-      buf.append(SummarizerUtils.percent(mainLeg.getFloorSchedule().get().getInitialValue()));
+      buf.append(SummarizerUtils.percent(mainLeg.getCollarSchedule().get().getInitialValue()));
     }
   }
 

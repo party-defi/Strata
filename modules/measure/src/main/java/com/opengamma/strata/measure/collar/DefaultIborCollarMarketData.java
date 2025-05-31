@@ -3,12 +3,11 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
 
-import com.opengamma.strata.basics.index.IborIndex;
-import com.opengamma.strata.collect.ArgChecker;
-import com.opengamma.strata.data.MarketData;
-import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+
 import org.joda.beans.ImmutableBean;
 import org.joda.beans.JodaBeanUtils;
 import org.joda.beans.MetaBean;
@@ -18,8 +17,10 @@ import org.joda.beans.gen.ImmutableConstructor;
 import org.joda.beans.gen.PropertyDefinition;
 import org.joda.beans.impl.light.LightMetaBean;
 
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
+import com.opengamma.strata.basics.index.IborIndex;
+import com.opengamma.strata.collect.ArgChecker;
+import com.opengamma.strata.data.MarketData;
+import com.opengamma.strata.pricer.capfloor.IborCapletFloorletVolatilities;
 
 /**
  * The default market data for cap/floors.
@@ -27,7 +28,7 @@ import java.lang.invoke.MethodHandles;
  * This uses a {@link IborCapFloorMarketDataLookup} to provide a view on {@link MarketData}.
  */
 @BeanDefinition(style = "light")
-final class DefaultIborCapFloorMarketData
+final class DefaultIborCollarMarketData
     implements IborCapFloorMarketData, ImmutableBean, Serializable {
 
   /**
@@ -52,15 +53,15 @@ final class DefaultIborCapFloorMarketData
    * @param marketData  the market data
    * @return the rates market view
    */
-  public static DefaultIborCapFloorMarketData of(
+  public static DefaultIborCollarMarketData of(
       IborCapFloorMarketDataLookup lookup,
       MarketData marketData) {
 
-    return new DefaultIborCapFloorMarketData(lookup, marketData);
+    return new DefaultIborCollarMarketData(lookup, marketData);
   }
 
   @ImmutableConstructor
-  private DefaultIborCapFloorMarketData(
+  private DefaultIborCollarMarketData(
       IborCapFloorMarketDataLookup lookup,
       MarketData marketData) {
 
@@ -71,7 +72,7 @@ final class DefaultIborCapFloorMarketData
   //-------------------------------------------------------------------------
   @Override
   public IborCapFloorMarketData withMarketData(MarketData marketData) {
-    return DefaultIborCapFloorMarketData.of(lookup, marketData);
+    return DefaultIborCollarMarketData.of(lookup, marketData);
   }
 
   //-------------------------------------------------------------------------
@@ -84,9 +85,9 @@ final class DefaultIborCapFloorMarketData
   /**
    * The meta-bean for {@code DefaultIborCapFloorMarketData}.
    */
-  private static final TypedMetaBean<DefaultIborCapFloorMarketData> META_BEAN =
+  private static final TypedMetaBean<DefaultIborCollarMarketData> META_BEAN =
       LightMetaBean.of(
-          DefaultIborCapFloorMarketData.class,
+          DefaultIborCollarMarketData.class,
           MethodHandles.lookup(),
           new String[] {
               "lookup",
@@ -97,7 +98,7 @@ final class DefaultIborCapFloorMarketData
    * The meta-bean for {@code DefaultIborCapFloorMarketData}.
    * @return the meta-bean, not null
    */
-  public static TypedMetaBean<DefaultIborCapFloorMarketData> meta() {
+  public static TypedMetaBean<DefaultIborCollarMarketData> meta() {
     return META_BEAN;
   }
 
@@ -111,7 +112,7 @@ final class DefaultIborCapFloorMarketData
   private static final long serialVersionUID = 1L;
 
   @Override
-  public TypedMetaBean<DefaultIborCapFloorMarketData> metaBean() {
+  public TypedMetaBean<DefaultIborCollarMarketData> metaBean() {
     return META_BEAN;
   }
 
@@ -142,7 +143,7 @@ final class DefaultIborCapFloorMarketData
       return true;
     }
     if (obj != null && obj.getClass() == this.getClass()) {
-      DefaultIborCapFloorMarketData other = (DefaultIborCapFloorMarketData) obj;
+      DefaultIborCollarMarketData other = (DefaultIborCollarMarketData) obj;
       return JodaBeanUtils.equal(lookup, other.lookup) &&
           JodaBeanUtils.equal(marketData, other.marketData);
     }

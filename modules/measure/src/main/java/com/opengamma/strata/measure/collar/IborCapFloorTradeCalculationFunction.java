@@ -3,7 +3,12 @@
  *
  * Please see distribution for license.
  */
-package com.opengamma.strata.measure.capfloor;
+package com.opengamma.strata.measure.collar;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -23,11 +28,6 @@ import com.opengamma.strata.measure.rate.RatesScenarioMarketData;
 import com.opengamma.strata.product.capfloor.IborCapFloor;
 import com.opengamma.strata.product.capfloor.IborCapFloorTrade;
 import com.opengamma.strata.product.capfloor.ResolvedIborCapFloorTrade;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Perform calculations on a single {@code IborCapFloorTrade} for each of a set of scenarios.
