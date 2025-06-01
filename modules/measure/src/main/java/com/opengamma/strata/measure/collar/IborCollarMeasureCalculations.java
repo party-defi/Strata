@@ -20,7 +20,7 @@ import com.opengamma.strata.pricer.sensitivity.MarketQuoteSensitivityCalculator;
 import com.opengamma.strata.product.collar.ResolvedIborCollarTrade;
 
 /**
- * Multi-scenario measure calculations for Ibor cap/floor trades.
+ * Multi-scenario measure calculations for Ibor collar trades.
  * <p>
  * Each method corresponds to a measure, typically calculated by one or more calls to the pricer.
  */

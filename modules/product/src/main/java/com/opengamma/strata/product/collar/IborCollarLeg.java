@@ -54,8 +54,8 @@ import com.opengamma.strata.product.swap.IborRateCalculation;
  * The collar instruments are defined as a set of call/put options on successive Ibor index rates,
  * known as Ibor collarlets.
  * <p>
- * The periodic payments in the resolved leg are collarlets or floorlets depending on the data in this leg.
- * The {@code capSchedule} field is used to represent strike values of individual collarlets.
+ * The periodic payments in the resolved leg are collarlets.
+ * The {@code collarSchedule} field is used to represent strike values of individual collarlets.
  */
 @BeanDefinition
 public final class IborCollarLeg
@@ -111,7 +111,7 @@ public final class IborCollarLeg
   /**
    * The collar schedule, optional.
    * <p>
-   * This defines the strike value of a cap as an initial value and a list of adjustments.
+   * This defines the strike value of a collar as an initial value and a list of adjustments.
    * Thus individual collarlets may have different strike values.
    * The collar rate is only allowed to change at payment period boundaries.
    */
@@ -142,6 +142,8 @@ public final class IborCollarLeg
     this.collarSchedule = collarSchedule;
     ArgChecker.isTrue(!this.getPaymentSchedule().getStubConvention().isPresent() ||
         this.getPaymentSchedule().getStubConvention().get().equals(StubConvention.NONE), "Stub period is not allowed");
+    ArgChecker.isTrue(this.getCollarSchedule().isPresent(),
+            "collar schedule must be present.");
     ArgChecker.isTrue(this.getCalculation().getIndex().getTenor().getPeriod().equals(this.getPaymentSchedule()
         .getFrequency().getPeriod()), "Payment frequency period should be the same as index tenor period");
   }
@@ -185,7 +187,7 @@ public final class IborCollarLeg
   @Override
   public ResolvedIborCollarLeg resolve(ReferenceData refData) {
     Schedule adjustedSchedule = paymentSchedule.createSchedule(refData);
-    DoubleArray cap = getCollarSchedule().isPresent() ? collarSchedule.resolveValues(adjustedSchedule) : null;
+    DoubleArray collar = getCollarSchedule().isPresent() ? collarSchedule.resolveValues(adjustedSchedule) : null;
     DoubleArray notionals = notional.resolveValues(adjustedSchedule);
     DateAdjuster fixingDateAdjuster = calculation.getFixingDateOffset().resolve(refData);
     DateAdjuster paymentDateAdjuster = paymentDateOffset.resolve(refData);
@@ -209,7 +211,7 @@ public final class IborCollarLeg
           .notional(signedNotional)
           .currency(currency)
           .yearFraction(period.yearFraction(calculation.getDayCount(), adjustedSchedule))
-          .caplet(cap != null ? cap.get(i) : null)
+          .collarlet(collar != null ? collar.get(i) : null)
           .build());
     }
     return ResolvedIborCollarLeg.builder()
@@ -322,13 +324,13 @@ public final class IborCollarLeg
 
   //-----------------------------------------------------------------------
   /**
-   * Gets the cap schedule, optional.
+   * Gets the collar schedule, optional.
    * <p>
-   * This defines the strike value of a cap as an initial value and a list of adjustments.
+   * This defines the strike value of a collar as an initial value and a list of adjustments.
    * Thus individual collarlets may have different strike values.
-   * The cap rate is only allowed to change at payment period boundaries.
+   * The collar rate is only allowed to change at payment period boundaries.
    * <p>
-   * If the product is not a cap, the cap schedule will be absent.
+   * If the product is not a collar, the collar schedule will be absent.
    * @return the optional value of the property, not null
    */
   public Optional<ValueSchedule> getCollarSchedule() {
@@ -385,7 +387,7 @@ public final class IborCollarLeg
     buf.append("currency").append('=').append(JodaBeanUtils.toString(currency)).append(',').append(' ');
     buf.append("notional").append('=').append(JodaBeanUtils.toString(notional)).append(',').append(' ');
     buf.append("calculation").append('=').append(JodaBeanUtils.toString(calculation)).append(',').append(' ');
-    buf.append("capSchedule").append('=').append(JodaBeanUtils.toString(collarSchedule)).append(',').append(' ');
+    buf.append("collarSchedule").append('=').append(JodaBeanUtils.toString(collarSchedule)).append(',').append(' ');
     buf.append('}');
     return buf.toString();
   }
@@ -431,15 +433,10 @@ public final class IborCollarLeg
     private final MetaProperty<IborRateCalculation> calculation = DirectMetaProperty.ofImmutable(
         this, "calculation", IborCollarLeg.class, IborRateCalculation.class);
     /**
-     * The meta-property for the {@code capSchedule} property.
+     * The meta-property for the {@code collarSchedule} property.
      */
-    private final MetaProperty<ValueSchedule> capSchedule = DirectMetaProperty.ofImmutable(
-        this, "capSchedule", IborCollarLeg.class, ValueSchedule.class);
-    /**
-     * The meta-property for the {@code floorSchedule} property.
-     */
-    private final MetaProperty<ValueSchedule> floorSchedule = DirectMetaProperty.ofImmutable(
-        this, "floorSchedule", IborCollarLeg.class, ValueSchedule.class);
+    private final MetaProperty<ValueSchedule> collarSchedule = DirectMetaProperty.ofImmutable(
+        this, "collarSchedule", IborCollarLeg.class, ValueSchedule.class);
     /**
      * The meta-properties.
      */
@@ -451,8 +448,8 @@ public final class IborCollarLeg
         "currency",
         "notional",
         "calculation",
-        "capSchedule",
-        "floorSchedule");
+        "collarSchedule");
+
 
     /**
      * Restricted constructor.
@@ -475,10 +472,8 @@ public final class IborCollarLeg
           return notional;
         case -934682935:  // calculation
           return calculation;
-        case -596212599:  // capSchedule
-          return capSchedule;
-        case -1562227005:  // floorSchedule
-          return floorSchedule;
+        case -596212599:  // collarSchedule
+          return collarSchedule;
       }
       return super.metaPropertyGet(propertyName);
     }
@@ -548,19 +543,11 @@ public final class IborCollarLeg
     }
 
     /**
-     * The meta-property for the {@code capSchedule} property.
+     * The meta-property for the {@code collarSchedule} property.
      * @return the meta-property, not null
      */
-    public MetaProperty<ValueSchedule> capSchedule() {
-      return capSchedule;
-    }
-
-    /**
-     * The meta-property for the {@code floorSchedule} property.
-     * @return the meta-property, not null
-     */
-    public MetaProperty<ValueSchedule> floorSchedule() {
-      return floorSchedule;
+    public MetaProperty<ValueSchedule> collarSchedule() {
+      return collarSchedule;
     }
 
     //-----------------------------------------------------------------------
@@ -579,7 +566,7 @@ public final class IborCollarLeg
           return ((IborCollarLeg) bean).getNotional();
         case -934682935:  // calculation
           return ((IborCollarLeg) bean).getCalculation();
-        case -596212599:  // capSchedule
+        case -596212599:  // collarSchedule
           return ((IborCollarLeg) bean).collarSchedule;
       }
       return super.propertyGet(bean, propertyName, quiet);
@@ -647,7 +634,7 @@ public final class IborCollarLeg
           return notional;
         case -934682935:  // calculation
           return calculation;
-        case -596212599:  // capSchedule
+        case -596212599:  // collarSchedule
           return collarSchedule;
 
         default:
@@ -676,7 +663,7 @@ public final class IborCollarLeg
         case -934682935:  // calculation
           this.calculation = (IborRateCalculation) newValue;
           break;
-        case -596212599:  // capSchedule
+        case -596212599:  // collarSchedule
           this.collarSchedule = (ValueSchedule) newValue;
           break;
         default:
@@ -700,7 +687,7 @@ public final class IborCollarLeg
           currency,
           notional,
           calculation,
-              collarSchedule);
+          collarSchedule);
     }
 
     //-----------------------------------------------------------------------
@@ -790,11 +777,11 @@ public final class IborCollarLeg
     /**
      * Sets the collar schedule, optional.
      * <p>
-     * This defines the strike value of a cap as an initial value and a list of adjustments.
+     * This defines the strike value of a collar as an initial value and a list of adjustments.
      * Thus individual collarlets may have different strike values.
      * The collar rate is only allowed to change at payment period boundaries.
      * <p>
-     * If the product is not a cap, the cap schedule will be absent.
+     * If the product is not a collar, the collar schedule will be absent.
      * @param collarSchedule  the new value
      * @return this, for chaining, not null
      */
@@ -814,7 +801,7 @@ public final class IborCollarLeg
       buf.append("currency").append('=').append(JodaBeanUtils.toString(currency)).append(',').append(' ');
       buf.append("notional").append('=').append(JodaBeanUtils.toString(notional)).append(',').append(' ');
       buf.append("calculation").append('=').append(JodaBeanUtils.toString(calculation)).append(',').append(' ');
-      buf.append("capSchedule").append('=').append(JodaBeanUtils.toString(collarSchedule)).append(',').append(' ');
+      buf.append("collarSchedule").append('=').append(JodaBeanUtils.toString(collarSchedule)).append(',').append(' ');
       buf.append('}');
       return buf.toString();
     }

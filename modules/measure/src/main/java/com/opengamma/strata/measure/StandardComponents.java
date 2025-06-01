@@ -21,6 +21,7 @@ import com.opengamma.strata.measure.bond.CapitalIndexedBondTradeCalculationFunct
 import com.opengamma.strata.measure.bond.FixedCouponBondTradeCalculationFunction;
 import com.opengamma.strata.measure.capfloor.IborCapFloorTradeCalculationFunction;
 import com.opengamma.strata.measure.cms.CmsTradeCalculationFunction;
+import com.opengamma.strata.measure.collar.IborCollarTradeCalculationFunction;
 import com.opengamma.strata.measure.credit.CdsIndexTradeCalculationFunction;
 import com.opengamma.strata.measure.credit.CdsTradeCalculationFunction;
 import com.opengamma.strata.measure.curve.CurveMarketDataFunction;
@@ -108,6 +109,7 @@ public final class StandardComponents {
       new FxSwapTradeCalculationFunction(),
       new FxVanillaOptionTradeCalculationFunction(),
       new IborCapFloorTradeCalculationFunction(),
+      new IborCollarTradeCalculationFunction(),
       new SecurityPositionCalculationFunction(),
       new SecurityTradeCalculationFunction(),
       new SwapTradeCalculationFunction(),
