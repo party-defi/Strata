@@ -76,12 +76,7 @@ public class InterestRateCollarPricingExample {
         List<Column> columns = ImmutableList.of(
 //                Column.of(Measures.LEG_INITIAL_NOTIONAL)//,
                 Column.of(Measures.PRESENT_VALUE),
-                Column.of(Measures.LEG_PRESENT_VALUE),
-                Column.of(Measures.PV01_CALIBRATED_SUM),
-                Column.of(Measures.PAR_RATE),
-                Column.of(Measures.ACCRUED_INTEREST),
-                Column.of(Measures.PV01_CALIBRATED_BUCKETED),
-                Column.of(AdvancedMeasures.PV01_SEMI_PARALLEL_GAMMA_BUCKETED));
+                Column.of(Measures.LEG_PRESENT_VALUE));
 
         // use the built-in example market data
         LocalDate valuationDate = LocalDate.of(2025, 1, 17);
