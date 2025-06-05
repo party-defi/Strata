@@ -37,7 +37,6 @@ public class JsonParserTest {
 
         List<String> tradeJsonList = new ArrayList<>();
         try {
-            int i = 0;
             out.println("number of trades " + trades.size());
             TradeInfo info = trade.getInfo();
             Swaption swaption = (Swaption) trade.getProduct();
@@ -71,7 +70,7 @@ public class JsonParserTest {
 
 
     @Test
-    public void swaption_bermuda() {
+    public void serialise_swaption_bermuda() {
         // Use JodaBeanSer for serialization/deserialization
         JodaBeanSer serializer = JodaBeanSer.COMPACT;
 
