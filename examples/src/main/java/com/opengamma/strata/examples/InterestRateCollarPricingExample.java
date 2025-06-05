@@ -54,8 +54,8 @@ import java.util.List;
 import static com.opengamma.strata.basics.currency.Currency.*;
 import static com.opengamma.strata.basics.date.BusinessDayConventions.MODIFIED_FOLLOWING;
 import static com.opengamma.strata.basics.date.DayCounts.THIRTY_U_360;
-import static com.opengamma.strata.basics.date.HolidayCalendarIds.EUTA;
-import static com.opengamma.strata.basics.index.IborIndices.EUR_EURIBOR_3M;
+import static com.opengamma.strata.basics.date.HolidayCalendarIds.GBLO;
+import static com.opengamma.strata.basics.index.IborIndices.GBP_LIBOR_3M;
 import static com.opengamma.strata.basics.schedule.Frequency.P6M;
 import static com.opengamma.strata.product.common.PayReceive.PAY;
 import static com.opengamma.strata.product.common.PayReceive.RECEIVE;
@@ -76,12 +76,12 @@ public class InterestRateCollarPricingExample {
         List<Column> columns = ImmutableList.of(
 //                Column.of(Measures.LEG_INITIAL_NOTIONAL)//,
                 Column.of(Measures.PRESENT_VALUE),
-                Column.of(Measures.LEG_PRESENT_VALUE));//,
-//                Column.of(Measures.PV01_CALIBRATED_SUM),
-//                Column.of(Measures.PAR_RATE),
-//                Column.of(Measures.ACCRUED_INTEREST),
-//                Column.of(Measures.PV01_CALIBRATED_BUCKETED),
-//                Column.of(AdvancedMeasures.PV01_SEMI_PARALLEL_GAMMA_BUCKETED));
+                Column.of(Measures.LEG_PRESENT_VALUE),
+                Column.of(Measures.PV01_CALIBRATED_SUM),
+                Column.of(Measures.PAR_RATE),
+                Column.of(Measures.ACCRUED_INTEREST),
+                Column.of(Measures.PV01_CALIBRATED_BUCKETED),
+                Column.of(AdvancedMeasures.PV01_SEMI_PARALLEL_GAMMA_BUCKETED));
 
         // use the built-in example market data
         LocalDate valuationDate = LocalDate.of(2025, 1, 17);
@@ -99,7 +99,7 @@ public class InterestRateCollarPricingExample {
         // Create the volatilities
         ZonedDateTime valuationDateTime = valuationDate.atStartOfDay(ZoneId.systemDefault());
         NormalIborCollarletExpiryStrikeVolatilities volatilities = NormalIborCollarletExpiryStrikeVolatilities.of(
-            EUR_EURIBOR_3M, valuationDateTime, surface);
+            GBP_LIBOR_3M, valuationDateTime, surface);
 
         // Create a completely new market data with our volatilities
         MarketData enhancedMarketData = ImmutableMarketData.builder(valuationDate)
@@ -110,14 +110,14 @@ public class InterestRateCollarPricingExample {
         // the complete set of rules for calculating measures
         CalculationFunctions functions = StandardComponents.calculationFunctions();
 
-        // create a collar market data lookup for the EUR_EURIBOR_3M index
-        IborCollarMarketDataLookup collarLookup = IborCollarMarketDataLookup.of(EUR_EURIBOR_3M, collarVolId);
+        // create a collar market data lookup for the GBP_LIBOR_3M index
+        IborCollarMarketDataLookup collarLookup = IborCollarMarketDataLookup.of(GBP_LIBOR_3M, collarVolId);
 
         // Debug output
         System.out.println("Volatilities ID: " + collarVolId);
         System.out.println("Volatilities ID class: " + collarVolId.getClass().getName());
-        System.out.println("Collar lookup index: " + EUR_EURIBOR_3M);
-        System.out.println("Collar lookup volatility ID: " + collarLookup.getVolatilityIds(EUR_EURIBOR_3M));
+        System.out.println("Collar lookup index: " + GBP_LIBOR_3M);
+        System.out.println("Collar lookup volatility ID: " + collarLookup.getVolatilityIds(GBP_LIBOR_3M));
 
         // Debug output
         System.out.println("Rates lookup: " + marketDataBuilder.ratesLookup(valuationDate));
@@ -152,17 +152,17 @@ public class InterestRateCollarPricingExample {
 
     private static final LocalDate START = LocalDate.of(2025, 9, 17);
     private static final LocalDate END = LocalDate.of(2029, 9, 17);
-    private static final IborRateCalculation RATE_CALCULATION = IborRateCalculation.of(EUR_EURIBOR_3M);
+    private static final IborRateCalculation RATE_CALCULATION = IborRateCalculation.of(GBP_LIBOR_3M);
     private static final Frequency FREQUENCY = Frequency.P3M;
     private static final BusinessDayAdjustment BUSS_ADJ =
-            BusinessDayAdjustment.of(BusinessDayConventions.FOLLOWING, EUTA);
+            BusinessDayAdjustment.of(BusinessDayConventions.FOLLOWING, GBLO);
     private static final PeriodicSchedule SCHEDULE = PeriodicSchedule.builder()
             .startDate(START)
             .endDate(END)
             .frequency(FREQUENCY)
             .businessDayAdjustment(BUSS_ADJ)
             .build();
-    private static final DaysAdjustment PAYMENT_OFFSET = DaysAdjustment.ofBusinessDays(2, EUTA);
+    private static final DaysAdjustment PAYMENT_OFFSET = DaysAdjustment.ofBusinessDays(2, GBLO);
     // SWAP COPIED BITS
     private static final NotionalSchedule UNIT_NOTIONAL = NotionalSchedule.of(GBP, 1d);
     private static final HolidayCalendarId CALENDAR = HolidayCalendarIds.SAT_SUN;
