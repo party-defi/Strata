@@ -1,6 +1,7 @@
 package com.opengamma.strata.examples;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.opengamma.strata.basics.ReferenceData;
 import com.opengamma.strata.basics.StandardId;
 import com.opengamma.strata.basics.currency.AdjustablePayment;
@@ -15,13 +16,25 @@ import com.opengamma.strata.calc.CalculationRunner;
 import com.opengamma.strata.calc.Column;
 import com.opengamma.strata.calc.Results;
 import com.opengamma.strata.calc.runner.CalculationFunctions;
+import com.opengamma.strata.calc.runner.CalculationParameters;
+import com.opengamma.strata.data.ImmutableMarketData;
 import com.opengamma.strata.data.MarketData;
 import com.opengamma.strata.examples.marketdata.ExampleData;
 import com.opengamma.strata.examples.marketdata.ExampleMarketData;
 import com.opengamma.strata.examples.marketdata.ExampleMarketDataBuilder;
+import com.opengamma.strata.market.curve.ConstantCurve;
+import com.opengamma.strata.market.surface.ConstantSurface;
+import com.opengamma.strata.market.surface.Surface;
+import com.opengamma.strata.market.surface.SurfaceMetadata;
+import com.opengamma.strata.market.surface.Surfaces;
 import com.opengamma.strata.measure.AdvancedMeasures;
 import com.opengamma.strata.measure.Measures;
 import com.opengamma.strata.measure.StandardComponents;
+import com.opengamma.strata.measure.collar.IborCollarMarketDataLookup;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilities;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilitiesId;
+import com.opengamma.strata.pricer.collar.IborCollarletVolatilitiesName;
+import com.opengamma.strata.pricer.collar.NormalIborCollarletExpiryStrikeVolatilities;
 import com.opengamma.strata.product.AttributeType;
 import com.opengamma.strata.product.Trade;
 import com.opengamma.strata.product.TradeInfo;
@@ -34,6 +47,8 @@ import com.opengamma.strata.report.trade.TradeReport;
 import com.opengamma.strata.report.trade.TradeReportTemplate;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.opengamma.strata.basics.currency.Currency.*;
@@ -73,15 +88,52 @@ public class InterestRateCollarPricingExample {
         ExampleMarketDataBuilder marketDataBuilder = ExampleMarketData.builder();
         MarketData marketData = marketDataBuilder.buildSnapshot(valuationDate);
 
+        // Create volatilities for the collar with a unique name to avoid conflicts
+        IborCollarletVolatilitiesName volName = IborCollarletVolatilitiesName.of("CustomNormalVol");
+        IborCollarletVolatilitiesId collarVolId = IborCollarletVolatilitiesId.of(volName);
+
+        // Create a constant surface for the volatilities with a unique name
+        SurfaceMetadata metadata = Surfaces.normalVolatilityByExpiryStrike("CustomNormalVol", DayCounts.ACT_365F);
+        Surface surface = ConstantSurface.of(metadata, 0.01); // 1% normal volatility
+
+        // Create the volatilities
+        ZonedDateTime valuationDateTime = valuationDate.atStartOfDay(ZoneId.systemDefault());
+        NormalIborCollarletExpiryStrikeVolatilities volatilities = NormalIborCollarletExpiryStrikeVolatilities.of(
+            EUR_EURIBOR_3M, valuationDateTime, surface);
+
+        // Create a completely new market data with our volatilities
+        MarketData enhancedMarketData = ImmutableMarketData.builder(valuationDate)
+            .addValueUnsafe(collarVolId, volatilities)
+            .add(marketData)
+            .build();
+
         // the complete set of rules for calculating measures
         CalculationFunctions functions = StandardComponents.calculationFunctions();
-        CalculationRules rules = CalculationRules.of(functions, marketDataBuilder.ratesLookup(valuationDate));
+
+        // create a collar market data lookup for the EUR_EURIBOR_3M index
+        IborCollarMarketDataLookup collarLookup = IborCollarMarketDataLookup.of(EUR_EURIBOR_3M, collarVolId);
+
+        // Debug output
+        System.out.println("Volatilities ID: " + collarVolId);
+        System.out.println("Volatilities ID class: " + collarVolId.getClass().getName());
+        System.out.println("Collar lookup index: " + EUR_EURIBOR_3M);
+        System.out.println("Collar lookup volatility ID: " + collarLookup.getVolatilityIds(EUR_EURIBOR_3M));
+
+        // Debug output
+        System.out.println("Rates lookup: " + marketDataBuilder.ratesLookup(valuationDate));
+        System.out.println("Collar lookup: " + collarLookup);
+
+        // Create calculation rules with both lookups using varargs
+        CalculationRules rules = CalculationRules.of(
+            functions,
+            marketDataBuilder.ratesLookup(valuationDate),
+            collarLookup);
 
         // the reference data, such as holidays and securities
         ReferenceData refData = ReferenceData.standard();
 
-        // calculate the results
-        Results results = runner.calculate(rules, trades, columns, marketData, refData);
+        // calculate the results using the enhanced market data that includes volatilities
+        Results results = runner.calculate(rules, trades, columns, enhancedMarketData, refData);
 
         // use the report runner to transform the engine results into a trade report
         ReportCalculationResults calculationResults =
