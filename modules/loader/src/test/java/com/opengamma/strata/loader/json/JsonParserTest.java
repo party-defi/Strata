@@ -23,52 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class JsonParserTest {
 
-
-    @Test
-    public void swaption_first_try_bermuda() {
-        JodaBeanSer serializer = JodaBeanSer.COMPACT;
-
-        String fmplLocation = "classpath:com/opengamma/strata/loader/fpml/ird-ex14-berm-swaption.xml";
-        ByteSource resource = ResourceLocator.of(fmplLocation).getByteSource();
-        FpmlDocumentParser parser = FpmlDocumentParser.of(FpmlPartySelector.matching("Party1"));
-        assertThat(parser.isKnownFormat(resource)).isTrue();
-        List<Trade> trades = parser.parseTrades(resource);
-        SwaptionTrade trade = (com.opengamma.strata.product.swaption.SwaptionTrade) trades.get(0);
-
-        List<String> tradeJsonList = new ArrayList<>();
-        try {
-            out.println("number of trades " + trades.size());
-            TradeInfo info = trade.getInfo();
-            Swaption swaption = (Swaption) trade.getProduct();
-            SwaptionExercise exercise = swaption.getExerciseInfo().get();
-            String exerciseJson = serializer.jsonWriter().write(exercise);
-            SwaptionExercise exerciseBean = (SwaptionExercise) serializer.jsonReader().read(exerciseJson, SwaptionExercise.class);
-
-            String swaptionJson = serializer.jsonWriter().write(swaption);
-            Bean swaptionBean = serializer.jsonReader().read(swaptionJson, Swaption.class);
-
-            out.println("exercise " + exerciseJson);
-            out.println("swaption " + swaptionJson);
-            ZonedDateTime expryDT = swaption.getExpiry();
-            out.println("expiry " + expryDT);
-            String infoJson = serializer.jsonWriter().write(info);
-            tradeJsonList.add(infoJson);
-            String productJson = serializer.jsonWriter().write(swaption);
-            tradeJsonList.add(productJson);
-            out.println(trade.getClass().getName());
-            String tradeJson = serializer.jsonWriter().write(trade);
-            out.println("Trade json " + tradeJson);
-            tradeJsonList.add(tradeJson);
-            Bean recoveredBean = serializer.jsonReader().read(tradeJson, SwaptionTrade.class);
-            Trade recoveredTrade = (Trade) recoveredBean;
-            out.println("Etuka Trade: " + recoveredTrade);
-        } catch (Exception e) {
-            out.println(e.getMessage());
-            assert (false);
-        }
-    }
-
-
     @Test
     public void serialise_swaption_bermuda() {
         // Use JodaBeanSer for serialization/deserialization
