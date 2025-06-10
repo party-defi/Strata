@@ -17,6 +17,8 @@ public final class CsvLoaderColumns {
   /** CSV header (Basic). */
   public static final String POSITION_TYPE_FIELD = "Strata Position Type";
   /** CSV header (Basic). */
+  public static final String SENSITIVITY_TYPE_FIELD = "Strata Sensitivity Type";
+  /** CSV header (Basic). */
   public static final String ID_SCHEME_FIELD = "Id Scheme";
   /** CSV header (Basic). */
   public static final String ID_FIELD = "Id";
@@ -96,7 +98,7 @@ public final class CsvLoaderColumns {
   /** CSV header. */
   public static final String PAYMENT_DATE_FIELD = "Payment Date";
   /** CSV header. */
-  static final String LEG_1_PAYMENT_DATE_FIELD = "Leg 1 " + PAYMENT_DATE_FIELD;
+  public static final String LEG_1_PAYMENT_DATE_FIELD = "Leg 1 " + PAYMENT_DATE_FIELD;
   /** CSV header. */
   public static final String LEG_2_PAYMENT_DATE_FIELD = "Leg 2 " + PAYMENT_DATE_FIELD;
   /** CSV header. */
