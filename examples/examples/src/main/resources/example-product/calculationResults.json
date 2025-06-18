@@ -1,0 +1,19 @@
+{
+  "valuationDate": "2025-01-17",
+  "targets": [
+    {
+      "type": "com.opengamma.strata.product.collar.IborCollarTrade",
+      "id": "Optional[example~1]",
+      "counterparty": "Optional[example~A]"
+    }
+  ],
+  "columns": [
+    {
+      "measure": "PresentValue"
+    },
+    {
+      "measure": "LegPresentValue"
+    }
+  ],
+  "resultsSummary": "Results{columns=[ColumnHeader{name=PresentValue, measure=PresentValue, currency=null}, ColumnHeader{name=LegPresentValue, measure=LegPresentValue, currency=null}], cells=[Result{value=GBP 988132.6325412053, failure=null}, Result{value=null, failure=Failure{reason=UNSUPPORTED, message=Measure 'LegPresentValue' is not supported by function 'IborCollarTradeCalculationFunction', items=[UNSUPPORTED: Measure 'LegPresentValue' is not supported by function 'IborCollarTradeCalculationFunction']}}]}"
+}

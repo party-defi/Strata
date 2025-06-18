@@ -73,6 +73,11 @@
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.jsoniter</groupId>
+      <artifactId>jsoniter</artifactId>
+      <version>0.9.19</version>
+    </dependency>
 
     <!-- Testing -->
     <dependency>

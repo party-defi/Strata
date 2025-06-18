@@ -1,7 +1,9 @@
 package com.opengamma.strata.examples;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.jsoniter.JsonIterator;
+import com.jsoniter.output.JsonStream;
+import com.opengamma.strata.basics.ImmutableReferenceData;
 import com.opengamma.strata.basics.ReferenceData;
 import com.opengamma.strata.basics.StandardId;
 import com.opengamma.strata.basics.currency.AdjustablePayment;
@@ -19,6 +21,7 @@ import com.opengamma.strata.calc.runner.CalculationFunctions;
 import com.opengamma.strata.calc.runner.CalculationParameters;
 import com.opengamma.strata.data.ImmutableMarketData;
 import com.opengamma.strata.data.MarketData;
+import com.opengamma.strata.examples.data.export.OptionalEncoder;
 import com.opengamma.strata.examples.marketdata.ExampleData;
 import com.opengamma.strata.examples.marketdata.ExampleMarketData;
 import com.opengamma.strata.examples.marketdata.ExampleMarketDataBuilder;
@@ -46,10 +49,17 @@ import com.opengamma.strata.report.ReportCalculationResults;
 import com.opengamma.strata.report.trade.TradeReport;
 import com.opengamma.strata.report.trade.TradeReportTemplate;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
+
+import org.joda.beans.Bean;
+import org.joda.beans.ser.JodaBeanSer;
+
+import com.opengamma.strata.examples.data.export.ExportUtils;
 
 import static com.opengamma.strata.basics.currency.Currency.*;
 import static com.opengamma.strata.basics.date.BusinessDayConventions.MODIFIED_FOLLOWING;
@@ -69,8 +79,108 @@ public class InterestRateCollarPricingExample {
         }
     }
 
+    static {
+        // Register the Optional encoder when the class is loaded
+        OptionalEncoder.register();
+    }
+
+
+    static Optional<String> serializeResults(Results results) {
+        //System.out.println("Serializing results: " + results);
+        System.out.println("Results class: " + results.getClass().getName());
+        //System.out.println("Is Bean: " + (results instanceof Bean));
+
+
+        if (results instanceof Bean) {
+            try {
+                String json = JsonStream.serialize(results);
+                System.out.println("Successfully serialized results to JSON");
+                return Optional.of(json);
+            } catch (Exception e) {
+                System.err.println("Error serializing results to JSON: " + e.getMessage());
+                e.printStackTrace();
+                // Return Optional.empty() if Bean serialization fails
+                return Optional.empty();
+            }
+        } else
+            return Optional.empty();
+    }
+
+   static Optional<String> serializeMarketData(ImmutableMarketData marketData) {
+        System.out.println("Market data class: " + marketData.getClass().getName());
+        System.out.println("Is Bean: " + (marketData instanceof Bean));
+
+        if (marketData instanceof Bean) {
+            try {
+                String json = JsonStream.serialize(marketData);
+                System.out.println("Successfully serialized market data to JSON");
+                return Optional.of(json);
+            } catch (Exception e) {
+                System.err.println("Error serializing market data to JSON: " + e.getMessage());
+                e.printStackTrace();
+                // Return Optional.empty() if Bean serialization fails
+                return Optional.empty();
+            }
+        }else
+            return Optional.empty();
+   }
+
+   static Optional<String> serializeTrade(IborCollarTrade trade) {
+        System.out.println("Serializing trade: " + trade);
+        System.out.println("Trade class: " + trade.getClass().getName());
+        //System.out.println("Is Bean: " + (trade instanceof Bean));
+
+        if (trade instanceof Bean) {
+            try {
+                String json = JsonStream.serialize(trade);
+                System.out.println("Successfully serialized trade to JSON");
+                return Optional.of(json);
+            } catch (Exception e) {
+                System.err.println("Error serializing trade to JSON: " + e.getMessage());
+                e.printStackTrace();
+                // Return Optional.empty() if Bean serialization fails
+                return Optional.empty();
+            }
+        } else
+            return Optional.empty();
+   }
+
+   static Optional<String> serializeReferenceData(ImmutableReferenceData referenceData) {
+        //System.out.println("Serializing reference data: " + referenceData);
+        System.out.println("Reference data class: " + referenceData.getClass().getName());
+        //System.out.println("Is Bean: " + (referenceData instanceof Bean));
+
+        if (referenceData instanceof Bean) {
+            try {
+                String json = JodaBeanSer.PRETTY.jsonWriter().write(referenceData);
+                System.out.println("Successfully serialized reference data to JSON");
+                return Optional.of(json);
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        } else
+            return Optional.empty();
+   }
+
+   static Optional<String> serializeCalculationRules(CalculationRules calculationRules) {
+        System.out.println("Serializing calculation rules: " + calculationRules);
+        System.out.println("Calculation rules class: " + calculationRules.getClass().getName());
+        //System.out.println("Is Bean: " + (calculationRules instanceof Bean));
+
+        if (calculationRules instanceof Bean) {
+            try {
+                String json = JodaBeanSer.PRETTY.jsonWriter().write(calculationRules);
+                System.out.println("Successfully serialized calculation rules to JSON");
+                return Optional.of(json);
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        } else
+            return Optional.empty();
+   }
+
     private static void calculate (CalculationRunner runner) {
-        List<Trade> trades = createsCollarletTrades ();
+        List<IborCollarTrade> trades = createsCollarletTrades ();
 
         // the columns, specifying the measures to be calculated
         List<Column> columns = ImmutableList.of(
@@ -97,7 +207,7 @@ public class InterestRateCollarPricingExample {
             GBP_LIBOR_3M, valuationDateTime, surface);
 
         // Create a completely new market data with our volatilities
-        MarketData enhancedMarketData = ImmutableMarketData.builder(valuationDate)
+        ImmutableMarketData enhancedMarketData = ImmutableMarketData.builder(valuationDate)
             .addValueUnsafe(collarVolId, volatilities)
             .add(marketData)
             .build();
@@ -112,11 +222,11 @@ public class InterestRateCollarPricingExample {
         System.out.println("Volatilities ID: " + collarVolId);
         System.out.println("Volatilities ID class: " + collarVolId.getClass().getName());
         System.out.println("Collar lookup index: " + GBP_LIBOR_3M);
-        System.out.println("Collar lookup volatility ID: " + collarLookup.getVolatilityIds(GBP_LIBOR_3M));
+        //System.out.println("Collar lookup volatility ID: " + collarLookup.getVolatilityIds(GBP_LIBOR_3M));
 
         // Debug output
-        System.out.println("Rates lookup: " + marketDataBuilder.ratesLookup(valuationDate));
-        System.out.println("Collar lookup: " + collarLookup);
+        //System.out.println("Rates lookup: " + marketDataBuilder.ratesLookup(valuationDate));
+        //System.out.println("Collar lookup: " + collarLookup);
 
         // Create calculation rules with both lookups using varargs
         CalculationRules rules = CalculationRules.of(
@@ -127,8 +237,100 @@ public class InterestRateCollarPricingExample {
         // the reference data, such as holidays and securities
         ReferenceData refData = ReferenceData.standard();
 
+        // Create the example-product directory if it doesn't exist
+        String dirPath = "examples/src/main/resources/example-product";
+        File dir = new File(dirPath);
+        try {
+            if (!dir.exists()) {
+                boolean created = dir.mkdirs();
+                if (!created) {
+                    System.err.println("Failed to create directory: " + dirPath);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error creating directory: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Export each trade to a JSON file
+        for (int i = 0; i < trades.size(); i++) {
+            IborCollarTrade trade = trades.get(i);
+            try {
+                Optional<String> jsonOpt = serializeTrade(trade);
+                if (jsonOpt.isPresent()) {
+                    ExportUtils.export(jsonOpt.get(), dirPath + "/trade_" + i + ".json");
+                    System.out.println("Exported trade " + i + " to " + dirPath + "/trade_" + i + ".json");
+                } else {
+                    System.err.println("Failed to serialize trade " + i + ": Bean serialization failed");
+                }
+            } catch (Exception e) {
+                System.err.println("Error exporting trade " + i + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // Export the market data to a JSON file
+        try {
+            Optional<String> jsonOpt = serializeMarketData(enhancedMarketData);
+            if (jsonOpt.isPresent()) {
+                ExportUtils.export(jsonOpt.get(), dirPath + "/marketData.json");
+                System.out.println("Exported market data to " + dirPath + "/marketData.json");
+            } else {
+                System.err.println("Failed to serialize market data: Bean serialization failed");
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting market data: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Export the reference data to a JSON file
+        try {
+            if (refData instanceof ImmutableReferenceData) {
+                Optional<String> jsonOpt = serializeReferenceData((ImmutableReferenceData) refData);
+                if (jsonOpt.isPresent()) {
+                    ExportUtils.export(jsonOpt.get(), dirPath + "/referenceData.json");
+                    System.out.println("Exported reference data to " + dirPath + "/referenceData.json");
+                } else {
+                    System.err.println("Failed to serialize reference data: Bean serialization failed");
+                }
+            } else {
+                System.err.println("Reference data is not an ImmutableReferenceData: " + refData.getClass().getName());
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting reference data: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Export the calculation rules to a JSON file
+        try {
+            Optional<String> jsonOpt = serializeCalculationRules(rules);
+            if (jsonOpt.isPresent()) {
+                ExportUtils.export(jsonOpt.get(), dirPath + "/calculationRules.json");
+                System.out.println("Exported calculation rules to " + dirPath + "/calculationRules.json");
+            } else {
+                System.err.println("Failed to serialize calculation rules: Bean serialization failed");
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting calculation rules: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         // calculate the results using the enhanced market data that includes volatilities
         Results results = runner.calculate(rules, trades, columns, enhancedMarketData, refData);
+
+        // Export the results to a JSON file
+        try {
+            Optional<String> jsonOpt = serializeResults(results);
+            if (jsonOpt.isPresent()) {
+                ExportUtils.export(jsonOpt.get(), dirPath + "/results.json");
+                System.out.println("Exported results to " + dirPath + "/results.json");
+            } else {
+                System.err.println("Failed to serialize results: Bean serialization failed");
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting results: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         // use the report runner to transform the engine results into a trade report
         ReportCalculationResults calculationResults =
@@ -139,7 +341,7 @@ public class InterestRateCollarPricingExample {
         tradeReport.writeAsciiTable(System.out);
     }
 
-    private static List<Trade> createsCollarletTrades () {
+    private static List<IborCollarTrade> createsCollarletTrades () {
        return ImmutableList.of (
         createBasicFixedVsLibor3mCollar()
        );
@@ -204,7 +406,7 @@ public class InterestRateCollarPricingExample {
     private static final AdjustablePayment PREMIUM =
             AdjustablePayment.of(CurrencyAmount.of(GBP, NOTIONAL_VALUE), LocalDate.of(2025, 9, 17));
 
-    private static Trade createBasicFixedVsLibor3mCollar () {
+    private static IborCollarTrade createBasicFixedVsLibor3mCollar () {
         TradeInfo tradeInfo =
                 TradeInfo.builder()
                         .id(StandardId.of("example", "1"))

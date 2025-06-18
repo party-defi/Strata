@@ -1,0 +1,9 @@
+[
+  {
+    "type": "com.opengamma.strata.product.collar.IborCollarTrade",
+    "id": "Optional[example~1]",
+    "counterparty": "Optional[example~A]",
+    "settlementDate": "2029-09-17",
+    "tradeClass": "IborCollarTrade"
+  }
+]
